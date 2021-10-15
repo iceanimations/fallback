@@ -1,0 +1,81 @@
+/* ptbFitLocalAxis.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbFitLocalAxis ()
+{
+	string $objList[] = `ptb_filterTransforms`;
+	if ( size( $objList ) < 2 )
+		error "This function requires two or more objects to be selected";
+
+	string $sourceObj[], $destObj[];
+	int $sourceNum = 1;
+
+	if( `checkBox -q -value ptb10_hierarchy` )
+	{
+		global string $ptb_hierarchy[];
+
+		$ptb_hierarchy = {};
+		$sourceObj[0] = $objList[size( $objList ) - 1];
+		ptb_listHierarchy { $sourceObj[0] };
+		$sourceObj = stringArrayCatenate( $sourceObj, $ptb_hierarchy );
+
+		$sourceNum = size( $sourceObj );
+
+		for( $cnt = 0; $cnt < size( $objList ) - 1; $cnt++ )
+		{
+			$ptb_hierarchy = {};
+			ptb_listHierarchy { $objList[$cnt] };
+
+			if( size( $ptb_hierarchy ) + 1 != $sourceNum )
+				error "Hierarchy does not match.";
+
+			$destObj[size( $destObj )] = $objList[$cnt];
+			$destObj = stringArrayCatenate( $destObj, $ptb_hierarchy );
+  		}
+	}
+	else
+	{
+		$sourceObj[0] = $objList[size( $objList ) - 1];
+
+		for( $cnt = 0; $cnt < size( $objList ) - 1; $cnt++ )
+			$destObj[$cnt] = $objList[$cnt];
+	}
+
+	for( $cnt = 0; $cnt < size( $sourceObj ); $cnt++ )
+	{
+		// get source local axis rotation
+		float $destRot[3] = `xform -q -ra $sourceObj[$cnt]`;
+	
+		for ( $dCnt = 0; $dCnt < size( $destObj ) / $sourceNum; $dCnt++ )
+		{
+			// object space
+			float $xyz[3] = `xform -q -ra $destObj[$dCnt * $sourceNum + $cnt]`;
+			if ( `checkBox -q -value ptb10_xbox` )
+				$xyz[0] = $destRot[0];
+			if ( `checkBox -q -value ptb10_ybox` )
+				$xyz[1] = $destRot[1];
+			if ( `checkBox -q -value ptb10_zbox` )
+				$xyz[2] = $destRot[2];
+	
+			xform -a -p true -ra $xyz[0] $xyz[1] $xyz[2] $destObj[$dCnt * $sourceNum + $cnt];
+		}
+	}
+}
+
+// end of script

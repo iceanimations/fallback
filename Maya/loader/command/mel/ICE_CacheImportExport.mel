@@ -1,0 +1,14 @@
+global proc ICE_CacheImportExport()
+{
+    python("import site\nsite.addsitedir(r'\\\\ice-sql\\Storage\\repository\\Python_Scripts')");
+    string $pyCommand = "" +
+    "\ntry:" +
+    "\n    reload(cie)" +
+    "\nexcept NameError as ne:" +
+    "\n    print ne, ' During reload '" +
+    "\n    import plugins.CacheImportExport as cie" +
+    "\nexcept AttributeError as ne:" +
+    "\n    print ne, ' During reload '" +
+    "\n    import plugins.CacheImportExport as cie" ;
+    python($pyCommand);
+}

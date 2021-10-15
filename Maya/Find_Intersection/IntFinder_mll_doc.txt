@@ -1,0 +1,14 @@
+intFinder(string predator_mesh, string prey_mesh, string python_function)
+
+
+pred_mesh: Is the name of the mesh for whose edges/faces it will determine if they intersect the prey_mesh.
+
+prey_mesh: Is the name of the mesh with which the plugin will determine if any of the pred_mesh's edge/face will intersect
+
+python_function: Is the globally accessible function(should be a function of an instance) which the plugin will call in order to return the edge(pred_mesh's) and face(prey_mesh's) combination or only the face face(pred_mesh's)
+
+
+python_function(edge, face)
+
+edge: ref./name of the edge(pred_mesh's) Will be 0 to indicate face intersection
+face: ref./name of the face(prey_mesh's) which was intersected by an edge or a face. If its a face-face intersection the corresponding face(pred_mesh's) is not returned

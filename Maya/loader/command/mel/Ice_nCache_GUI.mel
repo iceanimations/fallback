@@ -1,0 +1,344 @@
+//_______________________________________________________________________________________________________________________________________//
+//										GLOBAL VARIABLES								//
+//_______________________________________________________________________________________________________________________________________//
+
+
+
+
+
+
+
+//_______________________________________________________________________________________________________________________________________//
+//										METHODS									//
+//_______________________________________________________________________________________________________________________________________//
+
+	global proc string CheckSlashes( string $filename )
+	{
+	
+		string $result = $filename;
+		string $newResult;
+		$newResult = `substitute "\\\\" $result "/"`;
+		while( $newResult != $result )
+		{
+			$result = $newResult;
+			$newResult = `substitute "\\\\" $result "/"`;
+		}
+	
+		$result = $newResult;
+		$newResult = `substitute "//" $result "/"`;
+		while( $newResult != $result )
+		{
+			$result = $newResult;
+			$newResult = `substitute "//" $result "/"`;
+		}
+	
+		if( startsWith( $newResult, "/" ) )
+		$newResult = "/" + $newResult;
+	
+		return $newResult;
+	}
+
+	proc togglestates() 
+	{ 
+	  	if (`radioButtonGrp -q -select RadBtnGrp` == 3)
+	  	{ 
+			    intFieldGrp -edit -enable 1  fieldstartend ;
+	 	} 
+	       else 
+	  	{ 
+		    	intFieldGrp -edit -enable 0  fieldstartend  ;
+	  	} 
+	  
+	} 
+
+
+	global proc string Username()
+	{
+
+		string $result = system ("echo %USERNAME%"); 
+		return $result;
+
+
+	}
+
+
+	global proc createCache()
+	{
+		jobsubmission();
+		
+	}
+	
+	global proc jobsubmission()
+	{
+		if(!writemel())
+			return;
+		if(!writeJobfile())
+			return;
+		if(!writejobinfoile())
+			return;
+		if(!writecommandfile())
+			return;	
+	
+		string $jobcmmd="deadlinecommandbg c:\\temp\\cmd_job_info.job  c:\\temp\\cmd_plugin_info.job  c:\\temp\\commandsfile.txt";
+		system($jobcmmd);
+
+		confirmDialog -title "Job Submission Result" -message "Job submitted successfully!" -button "OK";
+
+		close();
+
+	}
+
+	global proc int writeJobfile()
+	{
+		// Create the job info file.
+		string $projectname=ProjectName();
+		string $submitFilename ="c:/temp/cmd_job_info.job";
+		$fileId = `fopen $submitFilename "w"`;
+		if( $fileId == 0 )
+		{
+			error( "Error in Deadline Submission Script: could not create " + $submitFilename + "\n" );
+			return 0;
+		}
+	
+	 	fprint $fileId ( "Plugin=CommandScript \n" );
+		fprint $fileId ( "Name=nCache In process---"+$projectname+"\n" );
+		fprint $fileId ( "Comment=" +"posted by "+Username()+ "\n" );
+		fprint $fileId ("Department= \n");
+		fprint $fileId ( "Pool=" + "blades" + "\n" );
+		fprint $fileId ("Group=none \n");
+		fprint $fileId ( "Priority=" + 50 + "\n" );
+		fprint $fileId ("TaskTimeoutMinutes=0 \n");
+		fprint $fileId ("EnableAutoTimeout=False \n");
+		fprint $fileId ("ConcurrentTasks=1 \n");
+		fprint $fileId ("LimitConcurrentTasksToNumberOfCpus=True \n");
+		fprint $fileId ( "MachineLimit=" + 0 + "\n" );
+		fprint $fileId ("Blacklist= \n");
+		fprint $fileId ("LimitGroups= \n");
+		fprint $fileId ("JobDependencies= \n");
+		fprint $fileId ("OnJobComplete=Nothing \n");
+		fprint $fileId ("Frames=0-0 \n");
+		fprint $fileId ("ChunkSize=1 \n");
+		fclose $fileId;
+
+		return 1;
+
+
+	}
+
+	global proc int writejobinfoile()
+	{
+		string $path=`workspace -q -fn`;
+		string $submitFilename ="c:/temp/cmd_plugin_info.job" ;
+		$fileId = `fopen $submitFilename "w"`;
+		if( $fileId == 0 )
+		{
+			error( "Error in Deadline Submission Script: could not create " + $submitFilename + "\n" );
+			return 0;
+		}
+		fprint $fileId ( "StartupDirectory=" + $path + "\n" );
+		fclose $fileId;
+
+		return 1;
+
+	}
+
+
+	global proc int writecommandfile()
+	{
+
+		string $submitFilename = "c:/temp/commandsfile.txt";
+		string $melpath="\""+`workspace -q -fn`+"/nCache.mel"+"\"";
+		string $cmd="\""+"c:\\Program Files\\Autodesk\\Maya2011\\bin\\mayabatch.exe"+"\" "+ " -file " +"\""+ `file -q -sceneName`+"\""+" -script "+$melpath;
+		$fileId = `fopen $submitFilename "w"`;
+		if( $fileId == 0 )
+		{
+			error( "Error in CommandsFile Submission Script: could not create " + $submitFilename + "\n" );
+			return 0;
+		}
+		fprint $fileId($cmd+"\n");
+		
+		fclose $fileId;
+
+		return 1;
+	}
+
+	global proc int writemel()
+	{
+		string $valctr=`radioButtonGrp -q -select RadBtnGrp`;
+		int $valstarend[]=`intFieldGrp -q -v fieldstartend`;
+		string $valsampl=`radioButtonGrp -q -select sampling`;
+		string $valrate=`intSliderGrp -q -v rate`;
+		string $projectpath=CheckSlashes(`textFieldGrp -q -text frw_projectPath`);
+		string $select[]=`ls -sl`;	
+		string $path=`workspace -q -fn`;
+		string $submitFilename = `workspace -q -fn`+"/nCache.mel";
+		$fileId = `fopen $submitFilename "w"`;
+		if( $fileId == 0 )
+		{
+			error( "Error in MEL Submission Script: could not create " + $submitFilename + "\n" );
+			return 0;
+		}
+		
+		$selShape = `listRelatives -shapes $select[0]`;
+		if(size($selShape)==0)
+			$selShape[0] = $select[0];
+		if(`nodeType $selShape[0]`!="nCloth")
+		{
+			error("Please select the Object to Make Cache!\n");
+			return 0;
+		}
+		fprint $fileId ( "setProject " + "\""+$path+"\";"+"\n");
+		fprint $fileId ("select "+$select[0]+";"+"\n");
+		fprint $fileId("doCreateNclothCache 4 {  "+"\""+"3"+"\""+","+"\""+$valstarend[0]+"\""+","+"\""+$valstarend[1]+"\""+", "+"\""+"OneFile"+"\""+", "+"\""+"1"+"\""+", "+"\""+"1"+"\""+", "+"\""+"0"+"\""+", "+"\""+"add"+"\""+", "+"\""+"0"+"\""+", "+"\""+"1"+"\""+", "+"\""+"1"+"\""+", "+"\""+"1"+"\""+", "+"\""+"1"+"\" };");
+		fprint $fileId ("file -save;");
+		//doCreateNclothCache 4 { "3", "1", "2", "OneFilePerFrame", "1", "","0","","0", "add", "0", "1", "1","0","1" } ;
+		fclose $fileId;
+		
+		return 1;
+	}
+
+
+
+global proc string SafeDeadlineCommand( string $command )
+{
+	print($command+"\n");
+	print( "running deadline command: " + $command + "\n" );
+	string $result = system("deadlinecommand " + $command );
+	$result = substituteAllString( $result, "\r", "" );
+	
+	string $resultArray[];
+	$resultArray = stringToStringArray( $result, "\n" );
+	if( size($resultArray) > 2 && startsWith( $resultArray[2], "UNC paths are not supported." ) )
+	{
+		int $tempResultArraySize = size($resultArray) - 3;
+		string $tempResultArray[];
+		for( $i = 0; $i < $tempResultArraySize; $i++ )
+			$tempResultArray[$i] = $resultArray[$i+3];
+		$result = stringArrayToString( $tempResultArray, "\n" );
+	}
+	
+	if( endsWith( $result, "\n" ) )
+		$result = substring( $result, 1, size( $result ) - 1 );
+	
+	return $result;
+}
+
+
+global proc close()
+{
+	deleteUI -window nCachedisplay;
+}
+
+global proc string SafeDeadlineCommand( string $command )
+{
+//	print( "running deadline command: " + $command + "\n" );
+	string $result = system("deadlinecommand " + $command );
+	$result = substituteAllString( $result, "\r", "" );
+	
+	string $resultArray[];
+	$resultArray = stringToStringArray( $result, "\n" );
+	if( size($resultArray) > 2 && startsWith( $resultArray[2], "UNC paths are not supported." ) )
+	{
+		int $tempResultArraySize = size($resultArray) - 3;
+		string $tempResultArray[];
+		for( $i = 0; $i < $tempResultArraySize; $i++ )
+			$tempResultArray[$i] = $resultArray[$i+3];
+		$result = stringArrayToString( $tempResultArray, "\n" );
+	}
+	
+	if( endsWith( $result, "\n" ) )
+		$result = substring( $result, 1, size( $result ) - 1 );
+	
+	return $result;
+}
+global proc SetImageDir()
+{
+
+	setProject "";
+	Ice_nCache_GUI();
+
+	/*global string $ProjectPathGrp;
+//	print("-getdirectory \"" + `textFieldButtonGrp -q -text $ProjectPathGrp` + "\""+"\n");
+	string $newdir = SafeDeadlineCommand( "-getdirectory \"" + `textFieldButtonGrp -q -text $ProjectPathGrp` + "\"" );
+	if( $newdir != "" )
+		textFieldButtonGrp -e -text $newdir $ProjectPathGrp;*/
+	
+}
+
+global proc string ProjectName()
+{
+	string $buffer[];
+	string $bufferr[];
+	string $SceneName=`workspace -q -fn`;
+	$numTokens = `tokenize $SceneName"/" $buffer`;
+	int $length=size($buffer);
+	string $result=$buffer[$length-1];
+	return $result;
+}
+
+
+
+global proc Ice_nCache_GUI()
+{
+	int $flag=`window -ex nCachedisplay`;
+	if($flag==1)
+	{
+		close();
+		GUI();
+	}
+	else
+	{
+		GUI();
+	}	
+
+}
+//_______________________________________________________________________________________________________________________________________//
+//										GUI					  				       //
+//_______________________________________________________________________________________________________________________________________//
+
+global proc GUI()
+{
+sysFile -md "c:/temp";
+string $projectPath=`workspace -q -fn`;	
+string $window = `window -title "ICE-Animations"  -w 400 -h 400 -mxb 0 nCachedisplay  `;
+	columnLayout -adjustableColumn true;
+			text -label "nCache Cache Job Submission" -h 30 -bgc 0 0.572 1 -fn "fixedWidthFont";
+	setParent ..;
+
+	frameLayout -label " Job Description" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable false;
+		columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4;
+		
+			radioButtonGrp -numberOfRadioButtons 3 -vr    -label "Cache Time Range:" -labelArray3 "Render Settings" "Time Slider" "Start End" -select 3  -onc togglestates RadBtnGrp;
+			intFieldGrp -numberOfFields 2  -label "Start/End:" -extraLabel "Frames"  -value1 3 -value2 5 fieldstartend ;
+			radioButtonGrp -numberOfRadioButtons 2     -label "Sampling:" -labelArray2 "Over" "Under" -select 1 sampling;
+			intSliderGrp -label "Rate:" -field true  -minValue 1 -maxValue 5  -fieldMinValue -0 -fieldMaxValue 5  -value 1 rate;
+			$ProjectPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 70 -cw 2 300 -label "nCache Project Path"  -buttonLabel "..." -fileName $projectPath  -annotation "Use this Maya project path to load the Maya scene" frw_projectPath`;
+					textFieldButtonGrp -e -bc SetImageDir $ProjectPathGrp;
+
+
+		setParent..;
+	setParent..;
+	
+	frameLayout -label "Job Submission";
+		columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4 buttonColumnLayout;
+			rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+				    button -label "Create"   -align "center" -width 110 -height 26 -c createCache;
+				    button -label "Close"   -align "center" -width 110 -height 26 -c close;
+
+
+			setParent..;
+		setParent..;
+	setParent..;
+
+
+
+showWindow $window;
+}
+
+Ice_nCache_GUI();
+
+
+
+
+
+

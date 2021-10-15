@@ -1,0 +1,1837 @@
+/* ptbCreateUI.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author	: Dirk Bialluch
+
+E-mail  : DirkB@Mayaring.com
+Homepage: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 29.01.2002
+
+*/
+
+//
+// build UI
+//
+
+global proc ptbCreateUI ()
+{
+	int $uiWidth = 420;
+	int $uiButtonWidth = 52;
+	int $uiLabelWidth = 90;
+	int $uiSepHeight = 15;
+	int $lineHeight = 20;
+
+	if ((`window -exists ui_ptb`) == true)
+		deleteUI ui_ptb;
+
+	window
+		-menuBar false
+		-maximizeButton false
+		-resizeToFitChildren false
+		-title "Pivot Toolbox V1.32"
+		-iconName "Pivot Toolbox"
+		-minimizeCommand "ptb_ui_iconTrue"
+		-restoreCommand "ptb_ui_iconFalse"
+		ui_ptb;
+
+		tabLayout
+			-scr true
+			-iv true
+			-dcc "ptbHelp 17"
+			-cc "ptb_storeUI"
+			ptb_tab;
+			columnLayout "Pivot";
+// set pivot (1)
+				frameLayout
+					-label "Set Pivot"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb1_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ( $uiButtonWidth );
+							symbolButton
+								-image "ptbSetPivot.xpm"
+								-c "ptb_main 1"
+								ptb1_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ( $uiWidth - 105 );
+									text "Set Pivot";
+									button -label "HELP" -h 22 -command "ptbHelp 1";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 1 1"
+										ptb1_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 1 1"
+										ptb1_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 1 1"
+										ptb1_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 80
+									-columnWidth 3 80;
+									text
+										-l " "
+										-h $lineHeight;
+									floatField
+										-value 0
+										-changeCommand "ptb_ui 1 1"
+										ptb1_xvalue;
+									floatField
+										-value 0
+										-changeCommand "ptb_ui 1 1"
+										ptb1_yvalue;
+									floatField
+										-value 0
+										-changeCommand "ptb_ui 1 1"
+										ptb1_zvalue;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 1 1"
+										ptb1_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 1 1"
+										ptb1_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40;
+									text
+										-l "Coordinates"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 60
+										-select 1
+										-l1 "ABS"
+										-l2 "REL"
+										-changeCommand "ptb_ui 1 1"
+										ptb1_relMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l  "Hierarchy"
+										-h $lineHeight;
+									checkBox
+										-label ""
+										-value 0
+										-changeCommand "ptb_ui 1 1"
+										ptb1_hierarchy;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// center pivot on object (2)
+				frameLayout
+					-label "Center Pivot on Object"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb2_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbCenterPivot.xpm"
+								-c "ptb_main 2"
+								ptb2_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Center Pivot to Object";
+									button -label "HELP" -h 22 -command "ptbHelp 2";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 2 1"
+										ptb2_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 2 1"
+										ptb2_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 2 1"
+										ptb2_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l  "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 2 1"
+										ptb2_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 2 1"
+										ptb2_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "BoundingBox"
+										-h $lineHeight;
+									optionMenu
+										-changeCommand "ptb_ui 2 1"
+										ptb2_bb;
+						          		menuItem -label "Center";
+						             		menuItem -label "-X";
+						             		menuItem -label "+X";
+					        			menuItem -label "-Y";
+					        			menuItem -label "+Y";
+							       		menuItem -label "-Z";
+									menuItem -label "+Z";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Base"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 90
+										-select 1
+										-l1 "Individual"
+										-l2 "Common"
+										-changeCommand "ptb_ui 2 1"
+										ptb2_mode;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// fit pivot (3)
+				frameLayout
+					-label "Fit Pivot"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb3_frame;
+					columnLayout;
+						rowLayout	
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbFitPivot.xpm"
+								-c "ptb_main 3"
+								ptb3_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Fit Pivot";
+									button -label "HELP" -h 22 -command "ptbHelp 3";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 3 1"
+										ptb3_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 3 1"
+										ptb3_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 3 1"
+										ptb3_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 3 1"
+										ptb3_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 3 1"
+										ptb3_spBox;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// average pivots (7)
+				frameLayout
+					-label "Average Pivots"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb7_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbAveragePivot.xpm"
+								-c "ptb_main 7"
+								ptb7_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Average Pivot";
+									button -label "HELP" -h 22 -command "ptbHelp 4";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 7 1"
+										ptb7_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 7 1"
+										ptb7_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 7 1"
+										ptb7_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 7 1"
+										ptb7_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 7 1"
+										ptb7_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Center"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 70
+										-select 1
+										-l1 "Normal"
+										-l2 "Weighted"
+										-changeCommand "ptb_ui 7 1"
+										ptb7_centerMode;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// center pivot on surface points (8)
+				frameLayout
+					-label "Center Pivot on Surface Points"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb8_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbCenterSurfacePoints.xpm"
+								-c "ptb_main 8"
+								ptb8_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Center Pivot on Surface Points";
+									button -label "HELP" -h 22 -command "ptbHelp 5";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 8 1"
+										ptb8_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 8 1"
+										ptb8_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 8 1"
+										ptb8_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 8 1"
+										ptb8_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 8 1"
+										ptb8_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40;
+									text
+										-l "Selection"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 70
+										-select 2
+										-l1 "Point(s)"
+										-l2 "Object(s)"
+										-changeCommand "ptb_ui 8 1"
+										ptb8_selMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Base"
+										-h $lineHeight;
+									radioButtonGrp
+										-enable false
+										-nrb 2
+										-columnWidth 1 90
+										-select 1
+										-l1 "Individual"
+										-l2 "Common"
+										-changeCommand "ptb_ui 8 1"
+										ptb8_baseMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "CV Number U"
+										-h $lineHeight
+										ptb8_pointNumLabelU;
+									intSliderGrp
+										-value 0
+										-field true
+										-minValue 0
+										-maxValue 0
+										-sliderStep 1
+										-extraLabel "--"
+										-changeCommand "ptb_ui 8 1"
+										ptb8_pointNumU;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "CV Number V"
+										-h $lineHeight
+										ptb8_pointNumLabelV;
+									intSliderGrp
+										-value 0
+										-field true
+										-minValue 0
+										-maxValue 0
+										-sliderStep 1
+										-extraLabel "--"
+										-changeCommand "ptb_ui 8 1"
+										ptb8_pointNumV;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// center pivot on polygon vertices (16)
+				frameLayout
+					-label "Center Pivot on Polygon Vertices"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb16_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ( $uiButtonWidth );
+							symbolButton
+								-image "ptbCenterPolyVertex.xpm"
+								-c "ptb_main 16"
+								ptb16_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Center Pivot on Polygon Vertices";
+									button -label "HELP" -h 22 -command "ptbHelp 6";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 16 1"
+										ptb16_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 16 1"
+										ptb16_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 16 1"
+										ptb16_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 16 1"
+										ptb16_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 16 1"
+										ptb16_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40;
+									text
+										-l "Selection"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 70
+										-select 2
+										-l1 "Point(s)"
+										-l2 "Object(s)"
+										-changeCommand "ptb_ui 16 1"
+										ptb16_selMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Base"
+										-h $lineHeight;
+									radioButtonGrp
+										-enable false
+										-nrb 2
+										-columnWidth 1 90
+										-select 1
+										-l1 "Individual"
+										-l2 "Common"
+										-changeCommand "ptb_ui 16 1"
+										ptb16_baseMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Vertex Number"
+										-h $lineHeight
+										ptb16_pointNumLabelU;
+									intSliderGrp
+										-value 0
+										-field true
+										-minValue 0
+										-maxValue 0
+										-sliderStep 1
+										-extraLabel "--"
+										-changeCommand "ptb_ui 16 1"
+										ptb16_vertexNum;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// center pivot on curve points (4)
+				frameLayout
+					-label "Center Pivot on Curve Points"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb4_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbCenterCurvePoints.xpm"
+								-c "ptb_main 4"
+								ptb4_button;
+								columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Center Pivot on Curve Points";
+									button -label "HELP" -h 22 -command "ptbHelp 7";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 4 1"
+										ptb4_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 4 1"
+										ptb4_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 4 1"
+										ptb4_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 4 1"
+										ptb4_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 4 1"
+										ptb4_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40;
+									text
+										-l "Selection"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 70
+										-select 2
+										-l1 "Point(s)"
+										-l2 "Object(s)"
+										-changeCommand "ptb_ui 4 1"
+										ptb4_selMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Base"
+										-h $lineHeight;
+									radioButtonGrp
+										-enable false
+										-nrb 2
+										-columnWidth 1 90
+										-select 1
+										-l1 "Individual"
+										-l2 "Common"
+										-changeCommand "ptb_ui 4 1"
+									ptb4_baseMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "CV Number"
+										-h $lineHeight
+										ptb4_pointNumLabel;
+									intSliderGrp
+										-value 0
+										-field true
+										-minValue 0
+										-maxValue 0
+										-sliderStep 1
+										-extraLabel "--"
+										-changeCommand "ptb_ui 4 1"
+										ptb4_pointNum;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40;
+									text
+										-l "Point Type"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 50
+										-select 1
+										-l1 "CV"
+										-l2 "EP"
+										-changeCommand "ptb_ui 4 1"
+										ptb4_pointType;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// unify pivots (6)
+				frameLayout
+					-label "Unify Pivots"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb6_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbUnifyPivots.xpm"
+								-c "ptb_main 6"
+								ptb6_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Unify Pivots";
+									button -label "HELP" -h 22 -command "ptbHelp 8";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 6 1"
+										ptb6_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 6 1"
+										ptb6_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 6 1"
+										ptb6_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									optionMenu
+										-changeCommand "ptb_ui 6 1"
+										ptb6_mode;
+						          		menuItem -label "Scale to Rotate";
+						             		menuItem -label "Rotate to Scale";
+						             		menuItem -label "Average";
+					        			menuItem -label "Swap";
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+
+			columnLayout "Object";
+// fit object (5)
+				frameLayout
+					-label "Fit Object"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb5_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbFitObject.xpm"
+								-c "ptb_main 5";
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text
+										-l  "Fit Object"
+										-h $lineHeight;
+									button -label "HELP" -h 22 -command "ptbHelp 9";
+									setParent ..;
+								rowLayout
+									-columnAlign 1 "center"
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l  "Source Pivot"
+										-h $lineHeight;
+								    	radioButtonGrp
+										-nrb 3
+										-columnWidth 1 80
+										-columnWidth 2 65
+										-select 3
+										-l1 "Absolute"
+										-l2 "Scale"
+										-l3 "Rotate"
+										-changeCommand "ptb_ui 5 1"
+										ptb5_sourcePiv;
+									setParent ..;
+								rowLayout
+									-columnAlign 1 "center"
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Dest. Pivot"
+										-h $lineHeight;
+								    	radioButtonGrp
+										-nrb 3
+										-columnWidth 1 80
+										-columnWidth 2 65
+										-select 3
+										-l1 "Absolute"
+										-l2 "Scale"
+										-l3 "Rotate"
+										-changeCommand "ptb_ui 5 1"
+										ptb5_destPiv;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Align Rotation"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value false
+										-changeCommand "ptb_ui 5 1"
+										ptb5_rotXBox;
+									checkBox
+										-label "Y"
+										-value false
+										-changeCommand "ptb_ui 5 1"
+										ptb5_rotYBox;
+									checkBox
+										-label "Z"
+										-value false
+										-changeCommand "ptb_ui 5 1"
+										ptb5_rotZBox;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// center object on pivot (12)
+				frameLayout
+					-label "Center Object on Pivot"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb12_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbCenterObject.xpm"
+								-c "ptb_main 12"
+								ptb12_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Center Object on Pivot";
+									button -label "HELP" -h 22 -command "ptbHelp 10";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 12 1"
+										ptb12_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 12 1"
+										ptb12_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 12 1"
+										ptb12_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 70
+										-select 2
+										-l1 "Scale"
+										-l2 "Rotate"
+										-changeCommand "ptb_ui 12 1"
+										ptb12_mode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Scale Pivot"
+										-h $lineHeight
+										ptb12_text;
+									checkBox
+										-label "Sticky"
+										-value true
+										-changeCommand "ptb_ui 12 1"
+										ptb12_sticky;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "BoundingBox"
+										-h $lineHeight;
+									optionMenu
+										-changeCommand "ptb_ui 12 1"
+										ptb12_bb;
+						          		menuItem -label "Center";
+						             		menuItem -label "-X";
+						             		menuItem -label "+X";
+			        					menuItem -label "-Y";
+			        					menuItem -label "+Y";
+							       		menuItem -label "-Z";
+									menuItem -label "+Z";
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+
+			columnLayout "Local Axis";
+// set local axis (11)
+				frameLayout
+					-label "Set Local Axis"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb11_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbSetAxis.xpm"
+								-c "ptb_main 11"
+								ptb11_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Set Local Axis";
+									button -label "HELP" -h 22 -command "ptbHelp 11";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Rotate"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 11 1"
+										ptb11_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 11 1"
+										ptb11_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 11 1"
+										ptb11_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 80
+									-columnWidth 3 80;
+									text
+										-l " "
+										-h $lineHeight;
+									floatField
+										-value 0
+										-changeCommand "ptb_ui 11 1"
+										ptb11_xvalue;
+									floatField
+										-value 0
+										-changeCommand "ptb_ui 11 1"
+										ptb11_yvalue;
+									floatField
+										-value 0
+										-changeCommand "ptb_ui 11 1"
+										ptb11_zvalue;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth
+									-rat 2 both 6
+									-columnWidth 2 40;
+									text
+										-l "Coordinates";
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 60
+										-select 1
+										-l1 "ABS"
+										-l2 "REL"
+										-changeCommand "ptb_ui 11 1"
+										ptb11_relMode;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// fit local axis (10)
+				frameLayout
+					-label "Fit Local Axis"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb10_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbFitAxis.xpm"
+								-c "ptb_main 10"
+								ptb10_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Fit Local Axis";
+									button -label "HELP" -h 22 -command "ptbHelp 12";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l  "Rotate"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 10 1"
+										ptb10_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 10 1"
+										ptb10_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 10 1"
+										ptb10_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l  "Hierarchy"
+										-h $lineHeight;
+									checkBox
+										-label ""
+										-value 0
+										-changeCommand "ptb_ui 10 1"
+										ptb10_hierarchy;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+
+			columnLayout "Misc Tools";
+// display pivot (9)
+				frameLayout
+					-label "Display Pivot"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb9_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbDisplayPivot.xpm"
+								-c "ptb_main 9"
+								ptb9_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text
+										-l "Display Pivot"
+										-h $lineHeight;
+									button -label "HELP" -h 22 -command "ptbHelp 13";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Display"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 3
+										-columnWidth 1 65
+										-columnWidth 2 60
+										-select 1
+										-l1 "Show"
+										-l2 "Hide"
+										-l3 "Toggle"
+										-changeCommand "ptb_ui 9 1"
+										ptb9_mode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 ($uiLabelWidth)
+									-columnWidth 2 65
+									-columnWidth 3 60;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 9 1"
+										ptb9_rbox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 9 1"
+										ptb9_sbox;
+									checkBox
+										-label "Local Axis"
+										-value true
+										-changeCommand "ptb_ui 9 1"
+										ptb9_abox;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// print pivot (13)
+				frameLayout
+					-label "Print Pivot Coordinates"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb13_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbPrintPivot.xpm"
+								-c "ptb_main 13";
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Print Pivot Coordinates";
+									button -label "HELP" -h 22 -command "ptbHelp 14";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									optionMenu
+										-changeCommand "ptb_ui 13 1"
+										ptb13_mode;
+						         	 	menuItem -label "Absolute";
+						         	    	menuItem -label "Scale";
+						         	    	menuItem -label "Rotate";
+					        			menuItem -label "Local Axis";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Coordinates"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 2
+										-columnWidth 1 110
+										-select 1
+										-l1 "World Space"
+										-l2 "Object Space"
+										-changeCommand "ptb_ui 13 1"
+										ptb13_coordMode;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// create geometry (14)
+				frameLayout
+					-label "Create Geometry"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb14_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbCreateGeometry.xpm"
+								-c "ptb_main 14";
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ($uiWidth - 105);
+									text "Create Geometry";
+									button -label "HELP" -h 22 -command "ptbHelp 15";
+									setParent ..;
+								rowLayout
+									-columnWidth 1 $uiLabelWidth
+									-numberOfColumns 2;
+									text
+										-l "Source Pivot"
+										-h $lineHeight;
+								    	radioButtonGrp
+										-nrb 3
+										-columnWidth 1 80
+										-columnWidth 2 65
+										-select 3
+										-l1 "Absolute"
+										-l2 "Scale"
+										-l3 "Rotate"
+										-changeCommand "ptb_ui 14 1"
+										ptb14_sourcePiv;
+									setParent ..;
+								rowLayout
+									-columnWidth 1 $uiLabelWidth
+									-numberOfColumns 2;
+									text
+										-l "Dest. Pivot"
+										-h $lineHeight;
+								    	radioButtonGrp
+										-nrb 3
+										-columnWidth 1 80
+										-columnWidth 2 65
+										-select 3
+										-l1 "Absolute"
+										-l2 "Scale"
+										-l3 "Rotate"
+										-changeCommand "ptb_ui 14 1"
+										ptb14_destPiv;
+									setParent ..;
+								rowLayout
+									-columnWidth 1 $uiLabelWidth
+									-numberOfColumns 2;
+									text
+										-l "Geometry"
+										-h $lineHeight;
+								    	radioButtonGrp
+										-nrb 2
+										-columnWidth 1 75
+										-select 1
+										-l1 "Locator"
+										-l2 "User defined"
+										-changeCommand "ptb_ui 14 1"
+										ptb14_geoMode;
+									setParent ..;
+								rowLayout
+									-columnWidth 1 $uiLabelWidth
+									-numberOfColumns 2;
+									text
+										-l "Group"
+										-h $lineHeight;
+								    	radioButtonGrp
+										-nrb 3
+										-columnWidth 1 65
+										-columnWidth 2 70
+										-select 1
+										-l1 "World"
+										-l2 "Parent"
+										-l3 "Group"
+										-changeCommand "ptb_ui 14 1"
+										ptb14_groupMode;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Replace"
+										-h $lineHeight;
+									checkBox
+										-label "Delete Original Geometry"
+										-value false
+										-changeCommand "ptb_ui 14 1"
+										ptb14_replaceBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Align Rotation"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value false
+										-changeCommand "ptb_ui 14 1"
+										ptb14_rotXBox;
+									checkBox
+										-label "Y"
+										-value false
+										-changeCommand "ptb_ui 14 1"
+										ptb14_rotYBox;
+									checkBox
+										-label "Z"
+										-value false
+										-changeCommand "ptb_ui 14 1"
+										ptb14_rotZBox;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+// group at pivots (15)
+				frameLayout
+					-label "Group at Pivots"
+					-labelAlign "bottom"
+					-cll true
+					-lw $uiWidth
+					-mh 5
+	                                -borderStyle "etchedIn"
+					-cc "ptb_ui 0 1"
+					-ec "ptb_ui 0 1"
+					ptb15_frame;
+					columnLayout;
+						rowLayout
+							-numberOfColumns 2
+							-columnWidth 1 ($uiButtonWidth);
+							symbolButton
+								-image "ptbGroupAtPivots.xpm"
+								-c "ptb_main 15"
+								ptb15_button;
+							columnLayout;
+								rowLayout
+									-numberOfColumns 2
+									-columnWidth 1 ( $uiWidth - 105 );
+									text "Group at Pivots";
+									button -label "HELP" -h 22 -command "ptbHelp 16";
+									setParent ..;
+								rowLayout
+									-numberOfColumns 4
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 40
+									-columnWidth 3 40;
+									text
+										-l "Move"
+										-h $lineHeight;
+									checkBox
+										-label "X"
+										-value true
+										-changeCommand "ptb_ui 15 1"
+										ptb15_xbox;
+									checkBox
+										-label "Y"
+										-value true
+										-changeCommand "ptb_ui 15 1"
+										ptb15_ybox;
+									checkBox
+										-label "Z"
+										-value true
+										-changeCommand "ptb_ui 15 1"
+										ptb15_zbox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth
+									-columnWidth 2 70;
+									text
+										-l "Pivot"
+										-h $lineHeight;
+									checkBox
+										-label "Rotate"
+										-value true
+										-changeCommand "ptb_ui 15 1"
+										ptb15_rpBox;
+									checkBox
+										-label "Scale"
+										-value true
+										-changeCommand "ptb_ui 15 1"
+										ptb15_spBox;
+									setParent ..;
+								rowLayout
+									-numberOfColumns 3
+									-columnWidth 1 $uiLabelWidth;
+									text
+										-l "Center"
+										-h $lineHeight;
+									radioButtonGrp
+										-nrb 3
+										-columnWidth 1 70
+										-columnWidth 2 85
+										-select 1
+										-l1 "Normal"
+										-l2 "Weighted"
+										-l3 "Last selection"
+										-changeCommand "ptb_ui 15 1"
+										ptb15_centerMode;
+									setParent ..;
+								setParent ..;
+							setParent ..;
+						setParent ..;
+					setParent ..;
+
+	showWindow ui_ptb;
+}
+
+//
+// UI Functions ********************************************************************************
+//
+
+global proc ptb_ui_iconTrue ()
+{
+	if (`window -exists ui_ptbHelp` == true)
+		window -e -iconify true ui_ptbHelp;
+}
+
+global proc ptb_ui_iconFalse ()
+{
+	if (`window -exists ui_ptbHelp` == true)
+		window -e -iconify false ui_ptbHelp;
+}
+
+global proc ptb_ui (int $function, int $store)
+{
+	switch ($function)
+	{
+		// set pivot
+		case 1:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb1_xbox` || `checkBox -q -value ptb1_ybox` || `checkBox -q -value ptb1_zbox`) &&
+				(`checkBox -q -value ptb1_rpBox` || `checkBox -q -value ptb1_spBox`))
+				symbolButton -e -enable true ptb1_button;
+			else
+				symbolButton -e -enable false ptb1_button;
+
+			// enable/disable float fields
+			if (`checkBox -q -value ptb1_xbox`)
+				floatField -e -editable true ptb1_xvalue;
+			else
+				floatField -e -editable false ptb1_xvalue;
+			if (`checkBox -q -value ptb1_ybox`)
+				floatField -e -editable true ptb1_yvalue;
+			else
+				floatField -e -editable false ptb1_yvalue;
+			if (`checkBox -q -value ptb1_zbox`)
+				floatField -e -editable true ptb1_zvalue;
+			else
+				floatField -e -editable false ptb1_zvalue;
+			break;
+
+		// center pivot to object
+		case 2:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb2_xbox` || `checkBox -q -value ptb2_ybox` || `checkBox -q -value ptb2_zbox`) &&
+				(`checkBox -q -value ptb2_rpBox` || `checkBox -q -value ptb2_spBox`))
+				symbolButton -e -enable true ptb2_button;
+			else
+				symbolButton -e -enable false ptb2_button;
+			break;
+
+		// fit pivot
+		case 3:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb3_xbox` || `checkBox -q -value ptb3_ybox` || `checkBox -q -value ptb3_zbox`) &&
+				(`checkBox -q -value ptb3_rpBox` || `checkBox -q -value ptb3_spBox`))
+				symbolButton -e -enable true ptb3_button;
+			else
+				symbolButton -e -enable false ptb3_button;
+			break;
+
+		// center pivot to curve points
+		case 4:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb4_xbox` || `checkBox -q -value ptb4_ybox` || `checkBox -q -value ptb4_zbox`) &&
+				(`checkBox -q -value ptb4_rpBox` || `checkBox -q -value ptb4_spBox`))
+				symbolButton -e -enable true ptb4_button;
+			else
+				symbolButton -e -enable false ptb4_button;
+
+			if (`radioButtonGrp -q -select ptb4_selMode` == 1)
+			{
+				intSliderGrp -e -enable false ptb4_pointNum;
+				radioButtonGrp -e -enable false ptb4_pointType;
+				radioButtonGrp -e -enable true ptb4_baseMode;
+			}
+			else
+			{
+				intSliderGrp -e -enable true ptb4_pointNum;
+				radioButtonGrp -e -enable true ptb4_pointType;
+				radioButtonGrp -e -enable false ptb4_baseMode;
+			}
+
+			if (`radioButtonGrp -q -select ptb4_pointType` == 1)
+				text -e -label "CV Number" ptb4_pointNumLabel;
+			else
+				text -e -label "EP Number" ptb4_pointNumLabel;
+
+			ptb_selectionWatcher;
+			break;
+
+		// unify pivots
+		case 6:
+			// enable/disable menu button
+			if (`checkBox -q -value ptb6_xbox` || `checkBox -q -value ptb6_ybox` || `checkBox -q -value ptb6_zbox`)
+				symbolButton -e -enable true ptb6_button;
+			else
+				symbolButton -e -enable false ptb6_button;
+			break;
+
+		// average pivot
+		case 7:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb7_xbox` || `checkBox -q -value ptb7_ybox` || `checkBox -q -value ptb7_zbox`) &&
+				(`checkBox -q -value ptb7_rpBox` || `checkBox -q -value ptb7_spBox`))
+				symbolButton -e -enable true ptb7_button;
+			else
+				symbolButton -e -enable false ptb7_button;
+			break;
+
+		// center pivot to surface points
+		case 8:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb8_xbox` || `checkBox -q -value ptb8_ybox` || `checkBox -q -value ptb8_zbox`) &&
+				(`checkBox -q -value ptb8_rpBox` || `checkBox -q -value ptb8_spBox`))
+				symbolButton -e -enable true ptb8_button;
+			else
+				symbolButton -e -enable false ptb8_button;
+
+			if (`radioButtonGrp -q -select ptb8_selMode` == 1)
+			{
+				intSliderGrp -e -enable false ptb8_pointNumU;
+				intSliderGrp -e -enable false ptb8_pointNumV;
+				radioButtonGrp -e -enable true ptb8_baseMode;
+			}
+			else
+			{
+				intSliderGrp -e -enable true ptb8_pointNumU;
+				intSliderGrp -e -enable true ptb8_pointNumV;
+				radioButtonGrp -e -enable false ptb8_baseMode;
+			}
+
+			ptb_selectionWatcher;
+			break;
+
+		// show/hide pivot
+		case 9:
+			// enable/disable menu button
+			if (`checkBox -q -value ptb9_rbox` || `checkBox -q -value ptb9_sbox` || `checkBox -q -value ptb9_abox`)
+				symbolButton -e -enable true ptb9_button;
+			else
+				symbolButton -e -enable false ptb9_button;
+			break;
+
+		// fit local axis
+		case 10:
+			// enable/disable menu button
+			if (`checkBox -q -value ptb10_xbox` || `checkBox -q -value ptb10_ybox` || `checkBox -q -value ptb10_zbox`)
+				symbolButton -e -enable true ptb10_button;
+			else
+				symbolButton -e -enable false ptb10_button;
+			break;
+
+		// unify pivots
+		case 11:
+			// enable/disable menu button
+			if (`checkBox -q -value ptb11_xbox` || `checkBox -q -value ptb11_ybox` || `checkBox -q -value ptb11_zbox`)
+				symbolButton -e -enable true ptb11_button;
+			else
+				symbolButton -e -enable false ptb11_button;
+			break;
+
+		// center object to pivot
+		case 12:
+			// enable/disable menu button
+			if (`checkBox -q -value ptb12_xbox` || `checkBox -q -value ptb12_ybox` || `checkBox -q -value ptb12_zbox`)
+				symbolButton -e -enable true ptb12_button;
+			else
+				symbolButton -e -enable false ptb12_button;
+
+			// change "sticky" text
+			if (`radioButtonGrp -q -select ptb12_mode` == 2)
+				text -e -l "Scale Pivot" ptb12_text;
+			else
+				text -e -l "Rotate Pivot" ptb12_text;
+			break;
+
+		// create geometry
+		case 14:
+			// enable/disable group mode selection
+			if (`checkBox -q -value ptb14_replaceBox`)
+				radioButtonGrp -e -enable false ptb14_groupMode;
+			else
+				radioButtonGrp -e -enable true ptb14_groupMode;
+			break;
+
+		// group at pivots
+		case 15:
+			// enable/disable menu button
+			if ((`checkBox -q -value ptb15_xbox` || `checkBox -q -value ptb15_ybox` || `checkBox -q -value ptb15_zbox`) &&
+				(`checkBox -q -value ptb15_rpBox` || `checkBox -q -value ptb15_spBox`))
+				symbolButton -e -enable true ptb15_button;
+			else
+				symbolButton -e -enable false ptb15_button;
+			break;
+
+		// center pivot on poly vertices
+		case 16:
+			// enable/disable menu button
+			if ( ( `checkBox -q -value ptb16_xbox` || `checkBox -q -value ptb16_ybox` || `checkBox -q -value ptb16_zbox` ) &&
+				( `checkBox -q -value ptb16_rpBox` || `checkBox -q -value ptb16_spBox` ) )
+				symbolButton -e -enable true ptb16_button;
+			else
+				symbolButton -e -enable false ptb16_button;
+
+			if ( `radioButtonGrp -q -select ptb16_selMode` == 1 )
+			{
+				intSliderGrp -e -enable false ptb16_vertexNum;
+				radioButtonGrp -e -enable true ptb16_baseMode;
+			}
+			else
+			{
+				intSliderGrp -e -enable true ptb16_vertexNum;
+				radioButtonGrp -e -enable false ptb16_baseMode;
+			}
+
+			ptb_selectionWatcher;
+			break;
+	}
+
+	// store UI settings
+	if ( $store )
+		ptb_storeUI;
+}
+
+// end of script

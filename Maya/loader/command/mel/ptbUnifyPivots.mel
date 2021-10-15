@@ -1,0 +1,107 @@
+/* ptbUnifyPivots.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbUnifyPivots ()
+{
+	int $count;
+	string $objList[] = `ptb_filterTransforms`;
+	int $unifyMode = `optionMenu -q -select ptb6_mode`;
+
+	for ($count = 0; $count < size($objList); $count++)
+	{
+		switch ($unifyMode)
+		{
+			// scale to rotate pivot
+			case 1:
+				float $new[3] = `xform -q -ws -rp $objList[$count]`;
+				float $old[3] = `xform -q -ws -sp $objList[$count]`;
+
+				if (`checkBox -q -value ptb6_xbox`)
+					$old[0] = $new[0];
+				if (`checkBox -q -value ptb6_ybox`)
+					$old[1] = $new[1];
+				if (`checkBox -q -value ptb6_zbox`)
+					$old[2] = $new[2];
+
+				xform -a -ws -sp $old[0] $old[1] $old[2] $objList[$count];
+				break;
+
+			// scale to rotate pivot
+			case 2:
+				float $new[3] = `xform -q -ws -sp $objList[$count]`;
+				float $old[3] = `xform -q -ws -rp $objList[$count]`;
+
+				if (`checkBox -q -value ptb6_xbox`)
+					$old[0] = $new[0];
+				if (`checkBox -q -value ptb6_ybox`)
+					$old[1] = $new[1];
+				if (`checkBox -q -value ptb6_zbox`)
+					$old[2] = $new[2];
+
+				xform -a -ws -rp $old[0] $old[1] $old[2] $objList[$count];
+				break;
+
+			// average pivots
+			case 3:
+				float $sp[3] = `xform -q -ws -sp $objList[$count]`;
+				float $rp[3] = `xform -q -ws -rp $objList[$count]`;
+
+				if (`checkBox -q -value ptb6_xbox`)
+					$sp[0] = $rp[0] = ($sp[0] + $rp[0]) / 2;
+				if (`checkBox -q -value ptb6_ybox`)
+					$sp[1] = $rp[1] = ($sp[1] + $rp[1]) / 2;
+				if (`checkBox -q -value ptb6_zbox`)
+					$sp[2] = $rp[2] = ($sp[2] + $rp[2]) / 2;
+
+				xform -a -ws -sp $sp[0] $sp[1] $sp[2] $objList[$count];
+				xform -a -ws -rp $rp[0] $rp[1] $rp[2] $objList[$count];
+				break;
+
+			// swap pivots
+			case 4:
+				float $sp[3] = `xform -q -ws -sp $objList[$count]`;
+				float $rp[3] = `xform -q -ws -rp $objList[$count]`;
+
+				if (`checkBox -q -value ptb6_xbox`)
+				{
+					$buffer = $sp[0];
+					$sp[0] = $rp[0];
+					$rp[0] = $buffer;
+				}
+				if (`checkBox -q -value ptb6_ybox`)
+				{
+					$buffer = $sp[1];
+					$sp[1] = $rp[1];
+					$rp[1] = $buffer;
+				}
+				if (`checkBox -q -value ptb6_zbox`)
+				{
+					$buffer = $sp[2];
+					$sp[2] = $rp[2];
+					$rp[2] = $buffer;
+			}
+
+			xform -a -ws -sp $sp[0] $sp[1] $sp[2] $objList[$count];
+			xform -a -ws -rp $rp[0] $rp[1] $rp[2] $objList[$count];
+			break;
+		}
+	}
+}
+
+// end of script

@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>465</width>
+    <height>706</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QComboBox" name="projectBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Project</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>--Select Project--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="epBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Episode</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>--Select Episode--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="seqBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Sequence</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>--Select Sequence--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="geosetDialogButton">
+        <property name="toolTip">
+         <string>Smooth Box: Select Geosets to make them smooth for preview</string>
+        </property>
+        <property name="text">
+         <string>SB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toggleCollapseButton">
+        <property name="toolTip">
+         <string>Collapse/Expand all Shots</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QCheckBox" name="cacheButton">
+        <property name="toolTip">
+         <string>Enable/Disable Cache for all selected shots</string>
+        </property>
+        <property name="text">
+         <string>Cache</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="previewButton">
+        <property name="toolTip">
+         <string>Enable/Disable Preview for all selected shots</string>
+        </property>
+        <property name="text">
+         <string>Preview</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cameraButton">
+        <property name="toolTip">
+         <string>Enable/Disable Camera for all selected shots</string>
+        </property>
+        <property name="text">
+         <string>Camera</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>445</width>
+         <height>503</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout" name="itemLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="directoryBox">
+        <property name="toolTip">
+         <string>Directory path to save exported Shots</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browseButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="addDirectoryButton">
+        <property name="toolTip">
+         <string>Specify a directory to save exported Shots instead of saving on TACTIC</string>
+        </property>
+        <property name="text">
+         <string>Add Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exportButton">
+        <property name="toolTip">
+         <string>Start exporting selected Shots</string>
+        </property>
+        <property name="text">
+         <string>Export</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="submitButton">
+        <property name="toolTip">
+         <string>Submit scene to deadline to export selected shots</string>
+        </property>
+        <property name="text">
+         <string>Submit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>465</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>500</x>
+     <y>732</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>169</x>
+     <y>585</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addDirectoryButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>721</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>41</x>
+     <y>693</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addDirectoryButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>directoryBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>720</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>692</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addDirectoryButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browseButton</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>730</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>527</x>
+     <y>702</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

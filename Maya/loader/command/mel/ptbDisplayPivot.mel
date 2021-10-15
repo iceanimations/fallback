@@ -1,0 +1,59 @@
+/* ptbDisplayPivot.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbDisplayPivot ()
+{
+	string $objList[] = `ptb_filterTransforms`;
+	int $display = `radioButtonGrp -q -select ptb9_mode`;
+
+	for ($count = 0; $count < size($objList); $count++)
+	{
+		switch ($display)
+		{
+			case 1:
+				if (`checkBox -q -value ptb9_rbox`)
+					setAttr ($objList[$count] + ".displayRotatePivot") 1;
+				if (`checkBox -q -value ptb9_sbox`)
+					setAttr ($objList[$count] + ".displayScalePivot") 1;
+				if (`checkBox -q -value ptb9_abox`)
+					setAttr ($objList[$count] + ".displayLocalAxis") 1;
+				break;
+			case 2:
+				if (`checkBox -q -value ptb9_rbox`)
+					setAttr ($objList[$count] + ".displayRotatePivot") 0;
+				if (`checkBox -q -value ptb9_sbox`)
+					setAttr ($objList[$count] + ".displayScalePivot") 0;
+				if (`checkBox -q -value ptb9_abox`)
+					setAttr ($objList[$count] + ".displayLocalAxis") 0;
+				break;
+			case 3:
+				if (`checkBox -q -value ptb9_rbox`)
+					setAttr ($objList[$count] + ".displayRotatePivot")
+						(!(`getAttr ($objList[$count] + ".displayRotatePivot")`));
+				if (`checkBox -q -value ptb9_sbox`)
+					setAttr ($objList[$count] + ".displayScalePivot")
+						(!(`getAttr ($objList[$count] + ".displayScalePivot")`));
+				if (`checkBox -q -value ptb9_abox`)
+					setAttr ($objList[$count] + ".displayLocalAxis")
+						(!(`getAttr ($objList[$count] + ".displayLocalAxis")`));
+				break;
+		}
+	}
+}
+
+// end of script

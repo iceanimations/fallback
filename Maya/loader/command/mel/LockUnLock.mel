@@ -1,0 +1,133 @@
+/*############################################################################
+#                        Script Written By: Ali Raza                         #
+#                        For ICE Animations (Pvt.) Ltd.                      #
+############################################################################*/
+
+global proc LockUnLock()
+{
+// Make a new window
+    if (`window -exists LockUnlock`) {
+        deleteUI LockUnlock;
+    }
+    window -title "LockUnlock" -widthHeight 300 200 LockUnlock;
+        columnLayout -adjustableColumn false -columnAlign "center";
+            frameLayout -label "Mesh Lock/UnLock" -collapsable true -collapse false -borderStyle "etchedIn";
+                rowLayout -numberOfColumns 2 -columnWidth2 120 120 -columnAlign2 "center" "center";
+                    button -width 120 -label "Lock Meshes" -command ("LockMesh");
+                    button -width 120 -label "Unlock Meshes" -command ("UnlockMesh");
+                    setParent ..;
+                setParent ..;
+            frameLayout -label "Joints Hide/UnHide" -collapsable true -collapse false -borderStyle "etchedIn";
+                rowLayout -numberOfColumns 2 -columnWidth2 120 120 -columnAlign2 "center" "center";
+                    button -width 120 -label "Hide Joints" -command ("HideJoints");
+                    button -width 120 -label "UnHide Joints" -command ("UnHideJoints");
+                    setParent ..;
+                setParent ..;
+            frameLayout -label "Lock/UnLock Nodes" -collapsable true -collapse false -borderStyle "etchedIn";
+                rowLayout -numberOfColumns 2 -columnWidth2 120 120 -columnAlign2 "center" "center";
+                    button -width 120 -label "Lock Nodes" -command ("LockNode");
+                    button -width 120 -label "UnLock Nodes" -command ("UnLockNode");
+                    setParent ..;
+                setParent ..;
+            frameLayout -label "CleanTSMnode" -collapsable true -collapse false -borderStyle "etchedIn";
+                rowLayout -numberOfColumns 2 -columnWidth2 120 120 -columnAlign2 "center" "center";
+                    button -width 120 -label "CleanTSMnode" -command ("clnTSMnode");
+                    setParent ..;
+                setParent ..;
+            columnLayout -adjustableColumn true -columnAlign "center";
+                button -width 240 -label "Close" -command ("deleteUI -window " + "LockUnlock");
+            setParent ..;
+        setParent ..;
+    showWindow LockUnlock;
+}
+
+//////////////////////////
+
+global proc LockMesh ()
+{
+
+    $sel = `ls  -type mesh`;
+    select $sel;
+
+    for ($node in $sel)
+    {
+        catch(`setAttr ($node +".overrideEnabled" ) 1`);
+        catch(`setAttr ($node +".overrideDisplayType") 2`);
+    }
+
+}
+
+////////////////////////////
+
+global proc HideJoints ()
+{
+    $sel = `ls -type joint`;
+    select $sel;
+
+    for ($node in $sel)
+    {
+        catch(`setAttr ($node +".drawStyle") 2`);
+    }
+}
+
+//////////////////////////////////////
+//////////////////////////
+
+global proc UnlockMesh ()
+{
+
+    $sel = `ls  -type mesh`;
+    select $sel;
+
+    for ($node in $sel)
+    {
+        catch( `setAttr ($node +".overrideEnabled" ) 0` );
+        catch( `setAttr ($node +".overrideDisplayType") 2` );
+    }
+
+}
+
+////////////////////////////
+
+global proc UnHideJoints ()
+{
+    $sel = `ls -type joint`;
+    select $sel;
+
+    for ($node in $sel)
+    {
+
+        catch(`setAttr ($node +".drawStyle") 0`);
+    }
+}
+
+//////////////////////////////////////
+//////////////////////////
+
+global proc LockNode ()
+{
+    $sel = `ls -sl`;
+    lockNode $sel;
+}
+
+////////////////////////////
+//////////////////////////
+
+global proc UnLockNode ()
+{
+    $sel = `ls -sl`;
+    lockNode -lock off $sel;
+}
+
+
+//////////////////////////
+
+global proc clnTSMnode ()
+{
+    $sel = `ls -type script`;
+    select $sel;
+    delete;
+}
+
+////////////////////////////
+

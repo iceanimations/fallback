@@ -1,0 +1,382 @@
+ global proc ICE_cameraToolbox()
+ {
+
+		if (`window -ex camera_toolWin`)
+			deleteUI -window camera_toolWin;
+			print ("Previous instance terminated. Restarting camera toolbox application.");
+
+		window    
+			-title  "Camera Toolbox v 2.0"
+            -height 577
+            -width  354
+            -menuBar  1
+            -sizeable 1
+            -toolbox  1
+			camera_toolWin;
+
+        menu -label "About" -helpMenu true;
+		menuItem -label "Camera Toolbox" -c "AboutWindow"; 
+
+		scrollLayout -horizontalScrollBarThickness 0;
+		columnLayout -adjustableColumn true LayoutCamera;
+
+		iconTextStaticLabel -m true -enable true  -width 100 -align "left" -style "iconOnly" -image1 "logo_camera_tool.bmp" -annotation "ICE Animations Camera Zoom Control v 2.0 | Author: Faisal A Hameed, Technical Dept. | www.iceanimations.com";
+
+		frameLayout
+          	-cc "window -edit -h 123 camera_toolWin"
+          	-ec "window -edit -h 577 camera_toolWin"
+			-marginWidth 15
+			-label "Camera Toolbox"
+			-borderStyle "in"
+			-collapse false
+			-collapsable true;
+		
+		columnLayout -adjustableColumn true -rowSpacing 1;
+		
+		separator;
+		text -label "List of cameras in the current scene:" -align left;
+		text -label "" -height 5;
+
+		lookThroughModelPanel "persp" modelPanel4;		
+		string $camera_list[] = `ls -type "camera"`;		
+
+		radioCollection radioBtns_camera;					
+
+		for ($populated_cam in $camera_list)
+			{          			
+			 radioButton 
+				-label $populated_cam 								
+				-changeCommand "selection_camera" 	  		
+				-align left  								
+				$populated_cam; 									
+				separator;                          			
+			}
+
+		rowColumnLayout -numberOfColumns 3 
+			-cw 1 77
+			-cw 2 77
+			-cw 3 77;
+
+		button -label "Refresh"	-c "reload_camera";	
+		button -label "Create New"	-c "create_camera";
+		button -label "Delete Camera"	-c "delete_camera" -enable 0 button_delCam;
+
+		setParent..;
+
+		//CHECKBOX RESOLUTION GATE --------------------------------------------------------------------------       
+
+		text -label ""; 	
+		separator;		
+
+		checkBox
+		   -enable false
+		   -label "Resolution Gate" 
+		   -al left
+		   -onCommand "on_ResGate"
+		   -offCommand "off_ResGate"
+		   resolution_gate;
+
+		//CHECKBOX DEFAULT LIGHT --------------------------------------------------------------------------
+
+		checkBox
+		   -enable true
+		   -label "Default Light" 
+		   -value 1
+		   -al left
+		   -onCommand "on_defaultLight"
+		   -offCommand "off_defaultLight";
+		   // default_light;
+
+		//CHECKBOX CAMERA SAFES --------------------------------------------------------------------------
+
+		checkBox
+		   -enable false
+		   -label "Display Camera Safes" 
+		   -value 0
+		   -al left
+		   -onCommand "on_cameraSafe"
+		   -offCommand "off_cameraSafe"	
+		   camera_safe;
+
+		text -label " ";
+
+		//HORIZONTAL OFFSET --------------------------------------------------------------------------
+		floatSliderGrp
+			-cw 1 58
+			-enable true
+			-label "Horizontal" -min -3 -max 3 -pre 3 -step 0.001 -dc "zoom_func" -cc "zoom_func" -field true 
+			slider_horizontal;						
+
+		//VERTICAL OFFSET --------------------------------------------------------------------------
+		floatSliderGrp
+			-cw 1 58
+			-enable true
+			-label "Vertical" -min -3 -max 3 -pre 3 -step 0.001 -dc "zoom_func" -cc "zoom_func" -field true 
+			slider_vertical;
+
+		//OVERSCAN (DEPTH) OFFSET --------------------------------------------------------------------------
+		floatSliderGrp
+			-cw 1 58
+			-enable true
+			-label "Depth" -min -0.01 -max 3 -pre 2 -step 0.02 -dc "zoom_func" -cc "zoom_func" -field true 
+			slider_overscan;
+
+		//NEAR-FAR CLIP PLANE -------------------------------------------------------------------------- 
+
+		rowColumnLayout -numberOfColumns 2 
+		-cw 1 100
+		-cw 2 125;
+
+		text 
+			-label "Near Clip Plane :" 
+			-al left 
+			-enable true; 
+
+		floatField
+			-enable true
+			-v 0.001
+			-min 0.001
+			-cc "NearClip" 
+			near_clip_float_value; 	
+
+		text 
+			-label "Far Clip Plane : " 
+			-al left 
+			-enable true;
+
+		floatField 
+		   -enable true
+		   -v 100000
+		   -cc "FarClip"
+			far_clip_float_value; 
+
+		setParent..;
+
+		text -label "";	 
+		button -label " Toggle Attribute Editor" -c "attr_editor" -enable 0 attr_panel;
+		button -label " Toggle Channel Layer" -c "CE";
+
+		rowLayout;
+		setParent ..;
+
+		showWindow camera_toolWin;
+        print ("Camera tool loaded");
+ }
+
+global proc CE()
+	{
+    ToggleChannelsLayers;
+
+	/* string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+  	select -r $selected_radioCam;		
+
+	toggleUIComponentVisibility "Attribute Editor"; */
+	}	
+ 
+ 
+	global proc AboutWindow()
+ {
+	string $message;	 
+
+	$message = ($message + "Camera toolbox gives you access to the most commonly\n");
+	$message = ($message + "used camera attributes. If you have any suggestions\n");
+	$message = ($message + "regarding this application, please feel free to speak\n");
+	$message = ($message + "to the Technical Dept.\n");
+
+	confirmDialog 
+		-title "About Camera ToolBox v 2.0" 
+		-ma "left"
+		-message $message
+		-button "Close";
+ }
+
+	global proc selection_camera()
+
+	{    
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;	
+    		lookThroughModelPanel $selected_radioCam modelPanel4;		
+
+        select -r $selected_radioCam; 	
+
+		checkBox 	-edit -enable 1 resolution_gate;	
+		checkBox 	-edit -enable 1 camera_safe;
+		//checkBox 	-edit -enable 1 default_light;
+		floatField	-edit -enable 1 near_clip_float_value;
+		floatField	-edit -enable 1 far_clip_float_value;
+		button		-edit -enable 1 attr_panel;
+		button		-edit -enable 1 button_delCam;
+
+   	 	int $checkBox_resGate = `getAttr ($selected_radioCam + ".displayResolution")`;
+		float $value_near = `getAttr ($selected_radioCam + ".nearClipPlane")`;			
+		float $value_far = `getAttr ($selected_radioCam + ".farClipPlane")`;			
+		float $value_Horizontal = `getAttr ($selected_radioCam + ".horizontalFilmOffset")`;
+		float $value_Vertical = `getAttr ($selected_radioCam + ".verticalFilmOffset")`;
+		float $value_depth = `getAttr ($selected_radioCam + ".overscan")`;
+
+		floatSliderGrp -edit -v $value_Horizontal "slider_horizontal";
+		floatSliderGrp -edit -v $value_Vertical "slider_vertical";
+		floatSliderGrp -edit -v $value_depth "slider_overscan";
+
+    	print ("Your Camera View has been changed to:" +$selected_radioCam+ "\n");	
+
+	}
+
+//RELOAD PANEL --------------------------------------------------------------------
+
+	global proc reload_camera()
+	{	
+		if (`window -ex camera_toolWin`)
+		{
+			deleteUI -window camera_toolWin;
+		}
+
+		lookThroughModelPanel "persp" modelPanel4;
+
+		ICE_cameraToolbox;							
+		print ("Your Panel has been Reloaded!");   
+	}
+
+//CREATE CAMERA --------------------------------------------------------------------
+
+	global proc create_camera()
+	 {
+
+		lookThroughModelPanel "persp" modelPanel4;
+
+		camera	-centerOfInterest 5 
+				-focalLength 35 
+				-lensSqueezeRatio 1 
+				-cameraScale 1 
+				-horizontalFilmAperture 1.5 
+				-horizontalFilmOffset 0 
+				-verticalFilmAperture 0.95 
+				-verticalFilmOffset 0 
+				-filmFit Fill -overscan 1 
+				-motionBlur 0 -shutterAngle 150 
+				-nearClipPlane 0.01 -farClipPlane 1000 
+				-orthographic 0 -orthographicWidth 30; 
+
+		objectMoveCommand; cameraMakeNode 1 "";
+
+     	ICE_cameraToolbox();                                
+		print ("Your Camera has been Created !");
+
+	}
+
+//DELETE SELECTED  --------------------------------------------------------------------
+
+	global proc delete_camera()
+		{
+		lookThroughModelPanel "persp" modelPanel4;
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+		select -r $selected_radioCam;	 
+		doDelete;	
+
+		ICE_cameraToolbox();
+
+		print ("Your Camera | " + $selected_radioCam + " | has been Deleted !");	      
+		} 
+
+//RESOLUTION GATE COMMANDS--------------------------------------------------------------------
+
+	global proc on_ResGate() {
+
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;	
+		camera -e -displayFilmGate off -displayResolution on -overscan 1.3 $selected_radioCam; 	
+		print ("Resolution Gate ON !");		
+
+	}
+
+	global proc off_ResGate()
+	{
+	string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;	
+	camera -e -displayFilmGate off -displayResolution off -overscan 1.0 $selected_radioCam;
+	print ("Resolution Gate OFF !");		
+	}
+
+//CAMERA SAFE COMMANDS--------------------------------------------------------------------
+
+	global proc on_cameraSafe()
+		{
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+		camera -e -displaySafeTitle on -displaySafeAction on $selected_radioCam;
+		}
+
+	global proc off_cameraSafe()
+		{
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+		camera -e -displaySafeTitle off -displaySafeAction off $selected_radioCam;
+		}
+
+
+/*	global proc check_cameraSafe()
+	{
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;	
+		int $camDispRes = `getAttr ($selected_radioCam + ".displaySafeTitle")`;
+
+		if ($camDispRes == 0)
+			{
+			setAttr ($selected_radioCam + ".displaySafeTitle") 1;
+			setAttr ($selected_radioCam + ".displaySafeAction") 1;
+			}
+		else
+			{
+			setAttr ($selected_radioCam + ".displaySafeTitle") 0;
+			setAttr ($selected_radioCam + ".displaySafeAction") 0;
+			}
+		}
+*/
+
+	global proc on_defaultLight()
+		{
+		setAttr "defaultRenderGlobals.enableDefaultLight" 1;
+		print ("Default Light has been turned on");
+		}
+
+	global proc off_defaultLight()
+		{
+		setAttr "defaultRenderGlobals.enableDefaultLight" 0;
+		print ("Default Light has been turned off");
+		}
+
+	global proc NearClip() {
+
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+		float $value_near = `floatField -query -value "near_clip_float_value"`;	
+		setAttr ($selected_radioCam + ".nearClipPlane") $value_near;		
+   	}
+
+	global proc FarClip() {
+
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+ 		float $value_far = `floatField -query -value "far_clip_float_value"`;	
+		setAttr ($selected_radioCam + ".farClipPlane") $value_far;	
+	}
+
+
+	global proc attr_editor() {
+
+		string $selected_radioCam = `radioCollection -query -select radioBtns_camera`;
+  		select -r $selected_radioCam;		
+
+		toggleUIComponentVisibility "Attribute Editor";  
+	}
+
+global proc zoom_func()
+{
+	$whichCam = `radioCollection -query -select radioBtns_camera`;
+	string $buffer;
+
+	float $offsetX = `floatSliderGrp -q -v slider_horizontal`;
+	float $offsetY = `floatSliderGrp -q -v slider_vertical`;
+	float $offsetZ =  `floatSliderGrp -q -v slider_overscan`;
+	
+	string $buffer = $whichCam + ".horizontalFilmOffset";
+	setAttr $buffer $offsetX;
+	
+	string $buffer = $whichCam + ".verticalFilmOffset";
+	setAttr $buffer $offsetY;
+	
+	string $buffer = $whichCam + ".overscan";
+	setAttr $buffer $offsetZ;
+}

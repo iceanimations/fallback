@@ -1,0 +1,258 @@
+/*
+    Script:     aj_UVTransfer.mel
+    Author:    	Ali Asad Jafri
+    Website:   	http://www.cgrama.com
+    Name:       AJ - UV Transfer v1.0
+
+    Descr:     	Transfers UV sets of multiple objects
+*/
+
+/////////////////////////////////
+//
+//	aj_UVTransfer
+//
+//	Desc:	This tool is used to automatically transfer UV Sets from multiple objects.
+//		To transfer UV sets load source objects and then target objects. Click apply to transfer
+/////////////////////////////////
+
+// Global Procedure
+global proc aj_UVTransfer() {
+
+    // User Interface  
+    if (`window -exists ajUVTransferUI`) deleteUI ajUVTransferUI;
+
+    if (`windowPref -exists ajUVTransferUI`) windowPref -r ajUVTransferUI; 
+    
+    window -rtf 1
+           -title "AJ - UV Transfer v1.0" -width 410
+           ajUVTransferUI;
+
+    string $about = "print \"AJ - UV Transfer v1.0 || Author: Syed Ali Asad Jafri || xxclusiveasad@gmail.com\"";
+    // Window Menu 
+    menuBarLayout;
+			
+	menu -l "Edit";
+		menuItem -l "Reset" -c aj_UVTransferReset;
+	
+	menu -l "Help";
+		menuItem -l "Help..." -c aj_UVTransferHelp;
+		menuItem -divider true;
+		menuItem -l "About" -c $about;	
+        
+    columnLayout 
+        -adjustableColumn true
+        -columnAlign "center";
+
+    separator -h 10;
+    text 
+        -label "Note: Polygons both source and target objects must have same topology.";        
+    separator -h 10;     
+
+    setParent..;
+    setParent..;
+                    
+    columnLayout -adj 1; 
+    
+    rowLayout 
+        -numberOfColumns 2
+        -columnWidth2 200 200    
+        -columnAttach 1 "both" 5
+        -columnAttach 2 "both" 5;
+        
+    // source list
+    columnLayout 
+        -adjustableColumn true
+        -columnAlign "center";
+        
+    text 
+        -label "Source Objects";
+        
+    textScrollList 
+        -numberOfRows 20
+        -allowMultiSelection false
+        ajUVSourceTSL;
+        
+    setParent..;
+    
+    //Target List
+    columnLayout 
+        -adjustableColumn true
+        -columnAlign "center";
+    
+    text 
+        -label "Target Objects";
+        
+    textScrollList 
+        -numberOfRows 20
+        -allowMultiSelection true
+        ajUVTargetTSL;
+        
+    setParent..;
+    setParent..;    
+    separator -h 10; 
+
+        
+    rowLayout 
+        -numberOfColumns 2
+        -columnWidth2 200 200
+        -columnAttach 1 "both" 5
+        -columnAttach 2 "both" 5;
+        
+    radioCollection ajUVTransferRadioCollection; 
+        radioButton -sl -label "Transfer One --> One" ajUVTransferOneRB;
+        radioButton -label "Transfer One --> All" ajUVTransferAllRB;
+      
+    setParent..;
+    separator -h 10;
+    setParent..;
+
+    rowLayout 
+        -numberOfColumns 2
+        -columnWidth2 200 200
+        -columnAttach 1 "both" 5
+        -columnAttach 2 "both" 5;
+        
+    button -bgc 0.8 0.8 0.8 -l "Add Source Objects" -c "ajUVAddToList(0)";
+    button -bgc 0.8 0.8 0.8 -l "Add Target Objects" -c "ajUVAddToList(1)";
+    
+    setParent..;
+
+    rowLayout 
+        -numberOfColumns 2
+        -columnWidth2 200 200
+        -columnAttach 1 "both" 5
+        -columnAttach 2 "both" 5;
+        
+    button -bgc 0.5 0.5 0.5 -l "Remove All Source Objects" -c ("textScrollList -edit -removeAll ajUVSourceTSL");
+    button -bgc 0.5 0.5 0.5 -l "Remove All Target Objects" -c ("textScrollList -edit -removeAll ajUVTargetTSL");
+    
+    //Set Parent to the Main Layout
+    setParent..; 
+    button -l "Apply" -c "ajUVTransferProc";    
+
+        
+    showWindow ajUVTransferUI;
+    
+}
+
+// Add to list procedure
+global proc ajUVAddToList(int $choice)
+{
+    string $ajSelObjs[] = `ls -sl`;    
+    
+    if($choice == 0)
+    {
+        for ($objs in $ajSelObjs) 
+        {
+            textScrollList -edit -append $objs ajUVSourceTSL;
+        }
+    }
+    else
+    {
+        for ($objs in $ajSelObjs)
+        {
+            textScrollList -edit -append $objs ajUVTargetTSL;        
+        }
+    }    
+
+}
+
+// Procedure for transfer
+global proc ajUVTransferProc() {
+    int $ajUVTransferOneOptionVar = `radioButton -q -sl ajUVTransferOneRB`;
+	int $ajUVTransferAllOptionVar = `radioButton -q -sl ajUVTransferAllRB`;
+	
+	string $ajSourceObjectsList[] = `textScrollList -q -ai ajUVSourceTSL`;
+	string $ajTargetObjectsList[] = `textScrollList -q -ai ajUVTargetTSL`;	
+	
+	int $ajSizeSourceObjs = `size $ajSourceObjectsList`;
+	int $ajSizeTargetObjs = `size $ajTargetObjectsList`;
+	
+// For One --> To All. UV Transfer.
+    if ($ajUVTransferAllOptionVar == 1) 
+    {
+        if($ajSizeSourceObjs == 1)
+        {
+            for ($objs in $ajTargetObjectsList)
+            {
+                polyTransfer -v 0 -vc 0 -uv 1 -ao $ajSourceObjectsList[0] $objs;         
+            }      
+            print "AJ - UV Transfer v1.0 has sucessfully transferred the UV...\n";  
+        }
+	    else
+    	{
+        	warning "AJ - UV Transfer v1.0 has encounterred a problem. Source object are great than target objects...terminating...\n";
+    	}	
+    }
+    
+// For One --> to One. UV Transfer.    
+    if ($ajUVTransferOneOptionVar == 1)
+    {
+        if ($ajSizeSourceObjs == $ajSizeTargetObjs)
+        {
+            for($i=0; $i<$ajSizeSourceObjs; $i++)
+            {
+				polyTransfer -v 0 -vc 0 -uv 1 -ao $ajSourceObjectsList[$i] $ajTargetObjectsList[$i];
+            }
+            print "AJ - UV Transfer v1.0 has sucessfully transferred the UV...\n";  
+        }
+        else 
+        {
+      		warning "AJ - UV Transfer v1.0 has encounterred a problem. Source object is not equal to target objects...terminating...\n";        
+        }
+    } 
+}
+
+// Help Window.
+global proc aj_UVTransferHelp()
+{
+    if (`window -exists aj_UVTransferHelpUI`) deleteUI aj_UVTransferHelpUI;
+
+    if (`windowPref -exists aj_UVTransferHelpUI`) windowPref -r aj_UVTransferHelpUI; 
+
+    window -mxb 0
+	        -wh 445 379
+	        -title "AJ - UV Transfer v1.0 Help" 
+        	aj_UVTransferHelpUI;
+
+    $ajWindowCollapseCmd = "window -e -wh 445 20 aj_UVTransferHelpUI";
+    $ajWindowExpandCmd = "window -e -wh 445 379 aj_UVTransferHelpUI";
+
+    frameLayout -l "Help"
+                -collapsable on
+                // -collapse on
+                -borderStyle "etchedIn"
+                -marginHeight 2
+                -marginWidth 2
+                -cc $ajWindowCollapseCmd
+                -ec $ajWindowExpandCmd
+                helpFrame;
+
+    columnLayout mainColumn;
+    string $helpContent;
+
+    $helpContent = ("This script eases the pain of transfering UV's from a list of objects either One to All, or One to One in List."
+                    + "\n\n"
+                    + "Polygon objects must have same topology for UV to transfer properly.\n"           
+                    + "\n"
+                    + "\n"
+                    +"For suggestions or comments you can email at xxclusiveasad@gmail.com");
+
+    scrollField -wordWrap true -ed off -w 435 -h 350 -text $helpContent helpScroll;
+    setParent mainColumn;
+
+
+    showWindow aj_UVTransferHelpUI;
+
+}
+
+// Reset UV Transfer utility.
+global proc aj_UVTransferReset() {
+    textScrollList -edit -removeAll ajUVSourceTSL;
+    textScrollList -edit -removeAll ajUVTargetTSL;
+    radioCollection -edit -select ajUVTransferOneRB ajUVTransferRadioCollection;    
+}
+
+
+
+

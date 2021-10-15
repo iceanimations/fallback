@@ -1,0 +1,54 @@
+/*
+    Script:     ICE_removeNameSpace.mel
+    Author:    	Ali Asad Jafri
+    Website:   	http://www.cgrama.com
+
+    Descr:     	Removes namespace from selected objects
+*/
+
+/////////////////////////////////
+//
+//	ICE_removeNameSpace
+//
+//	Desc:	Removes namespace from all selected objects and skips objects that have no namepsace.
+//		For example character:character_geo will be changed to character_geo
+/////////////////////////////////
+
+
+global proc ICE_removeNameSpace() {
+	// Object Selected
+	string $selGeo[] = `ls -sl -dag -dep`;
+
+	// Error Check
+	if (size($selGeo) == 0) {
+		error "Nothing Selected. Please select an object.";
+	}
+
+	// string variable declaration
+	string $objTemp;
+	string $prefStrg[];
+	string $renamedObj;
+	int $numTok;
+	int $lastTok;
+	int $i;
+	
+	int $sizeSel = `size($selGeo)`;
+	for ($i; $i < $sizeSel; $i++)
+	{
+		$objTemp = $selGeo[$i];
+		// separation of prefix from object name
+		$numTok = `tokenize $objTemp ":" $prefStrg`; 
+
+		if ($numTok >= 2)
+		{
+		// rename object with more than one namespace
+		rename $objTemp $prefStrg[$numTok - 1];
+		}
+		else {
+		print ("\n" + $objTemp + " = Object has no namespace.");
+		}
+		
+	}	
+	print "\nNamespace Removal Complete!";
+}
+

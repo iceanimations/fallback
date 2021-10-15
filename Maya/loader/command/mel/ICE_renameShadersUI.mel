@@ -1,0 +1,150 @@
+global proc ICE_renameShadersUI()
+{
+
+	$win = "renameShaderWin";
+	if (`window -exists $win`)
+		deleteUI $win;
+
+	window -title "Rename Shaders" -wh 210 110 -s 0 $win;
+
+	columnLayout -adj true -co "both" 10 ;
+
+	text -align "left" -l "Base name:";
+	$searchTextGrp = `textField -tx ""`;
+	$chkBox = `checkBox -label "rename files on disk?" -align "left"`;
+	$btn = `button -label "Rename!" -c ("renameShaders(\"" + $searchTextGrp +"\", " + "\"" + $chkBox + "\")")`;
+
+	//textField -e -cc ("renameShaders(\"" + $searchTextGrp +"\", " + "\"" + $chkBox + "\")") $searchTextGrp;
+
+
+	
+	showWindow $win;
+}
+
+
+proc string addPrefix(string $str, string $prefix)
+{
+	return ($prefix+$str);
+}
+
+proc string removePrefix(string $str, string $prefix)
+{
+	if(startsWith($str, $prefix))
+		$str = endString($str, size($str)-size($prefix));
+		
+	return $str;
+}
+
+proc string addSuffix(string $str, string $suffix)
+{
+	return ($str+$suffix);
+}
+
+proc string removeSuffix(string $str, string $suffix)
+{
+	if(endsWith($str, $suffix))
+		$str = startString($str, size($str)-size($suffix));
+		
+	return $str;
+}
+
+proc string getShadingSuffix(string $type)
+{
+	string $suffix;
+	$class = getClassification($type);
+		
+	if ($class[0] == "shadingEngine")
+	{
+			$suffix = "SG";
+	}
+	else if ($class[0] == "shader/surface")
+	{
+		$suffix = "material";
+	}			
+	else if ($class[0] == "shader/displacement")
+	{
+		$suffix = "displacement";
+	}			
+	else
+	{
+		$suffix = $type;
+	}
+	
+	return $suffix;
+}
+
+proc renameShadingNetwork(string $obj, string $parent, int $rename)
+{
+	$type = `nodeType $parent`;
+	$suffix = getShadingSuffix($type);
+	if($suffix=="file")
+	{
+		string $destPlugs[] = `connectionInfo -dfs ($parent+".outColor")`;
+		if(size($destPlugs)>0)
+		{
+			string $buffer[];
+			tokenize($destPlugs[0], ".", $buffer);
+			$suffix = ($buffer[1]+"_"+$suffix);
+		}
+		else
+		{
+			$destPlugs = `connectionInfo -dfs ($parent+".outAlpha")`;
+			if(size($destPlugs)>0)
+			{
+				string $buffer[];
+				tokenize($destPlugs[0], ".", $buffer);
+				$suffix = ($buffer[1]+"_"+$suffix);
+			}
+
+		}
+	}
+
+	//print ($obj+"_"+$suffix+" ");
+	
+	// Get the connected plugs of the parent
+	string $children[] = `listConnections -scn 1 -d 0 -s 1 $parent`;
+	$children = stringArrayRemoveDuplicates($children);
+	
+	$parent = `rename $parent ($obj+"_"+$suffix)`;
+
+	if(`nodeType $parent`=="file" && $rename==1)
+	{
+		$texName = `getAttr ($parent+".fileTextureName")`;
+		$ext = fileExtension($texName);
+		$baseName = basename($texName, $ext);
+		$path = (startString($texName, (size($texName)-size(($baseName+$ext)))));
+		$newName = ($path+$parent+"."+$ext);
+		setAttr -type "string" ($parent+".fileTextureName") $newName;
+		print($texName+" has been renamed to "+$newName+"\n");
+	
+		sysFile -ren $newName $texName;
+	}
+
+	for ($child in $children)
+	{
+		if((`nodeType $child`!="transform") && (`nodeType $child`!="mesh"))
+		{
+			renameShadingNetwork($obj, $child, $rename);
+		}
+	}
+}
+
+global proc renameShaders(string $searchTextGrp, string $chkBox)
+{
+	$selection = `ls -sl`;
+	$shader = $selection[0];
+
+	$baseName = `textField -q -tx $searchTextGrp`;
+	$rename = `checkBox -q -v $chkBox`;
+	
+	$type = `nodeType $shader`;
+	$suffix = getShadingSuffix($type);
+
+	renameShadingNetwork($baseName, $shader, $rename);
+
+	if($suffix=="material")
+		print("Base shader renamed to " + $baseName + "_material!\n");
+	else if($suffix=="displacement")
+		print("Base shader renamed to " + $baseName + "_displacement!\n");	
+
+}

@@ -1,0 +1,51 @@
+//if (`getenv user` != "Administrator"){
+
+
+global proc string g_loader_load_mel_path() {
+  string $result = `whatIs g_loader_load_mel_path`;
+
+  string $tokens[];
+  tokenize $result " " $tokens;
+
+  string $path = "";
+  int $x;
+  for ($x=4; $x<size($tokens); $x++) {
+    string $cur = $tokens[$x];
+    if ($cur == "//") {
+      break;
+    }
+    if ($path != "") {
+      $path += " ";
+    }
+    $path += $cur;
+  }
+  return $path;
+}
+
+
+// add the path to where the directory exists and accessible to clients
+// string $MENU = "r:/Pipe_Repo/Users/Hussain/utilities/loader";
+string $py_cmd = (
+  "import pymel.core as pc"+
+  "\nimport os.path as op"+
+  "\nfrom site import addsitedir as asd"+
+  "\nasd(op.dirname(r'"+ g_loader_load_mel_path() + "'))"+
+  "\nimport icemenu"
+);
+
+print $py_cmd;
+python($py_cmd);
+
+//}
+
+//global proc string fromNativePath ( string $strFile )
+//{
+	//if( `about -nt` )
+	//{
+        //string $buf[];
+        //string $newStr = encodeString($strFile);
+        //tokenize($newStr, "\\", $buf);
+        //$strFile = stringArrayToString($buf, "/");
+    //}
+	//return $strFile;
+//}

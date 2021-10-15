@@ -1,0 +1,763 @@
+{
+  "Rendering": {
+    "Render Shots": {
+      "_call": "_renderShots",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Add Material Ids": {
+      "_call": "addMtlIds",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Add Object Ids (Auto)": {
+      "_call": "addObjectIds_auto",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Add Object Ids": {
+      "_call": "addObjectIds",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Register Multi Stereo Cam": {
+      "_call": "enableMultiStereoCam",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Setup Contact Layer": {
+      "_call": "setupContLayer",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Setup Shot": {
+      "_call": "setupScene",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Setup SG Nodes": {
+      "_call": "setupSGNodes",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Hair Cache GUI": {
+      "_call": "Ice_HairCache_GUI",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Display Render Layers Info": {
+      "_call": "displayRenderLayersInfo",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Setup Redshift AOVs": {
+      "_call": "setupPasses",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Matte IDs": {
+      "_call": "matte_ids",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Render GUI": {
+      "_call": "Ice_Render_GUI",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Enable VRay passes": {
+      "_call": "enable_VRay_passes",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+      "Ai Sliced Render": {
+      "_call": "slicedRender",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "nCache GUI": {
+      "_call": "Ice_nCache_GUI",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Submit To Deadline": {
+      "_call": "SubmitJobToDeadline",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Banka Setup": {
+      "_call": "Ice_Banka_Setup",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Animation": {
+    "Marker Select": {
+      "_call": "selectMarker",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Multi Shot Export": {
+      "_call": "launchMSE",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Multi Shot Export (Old)": {
+      "_call": "submit_shot",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Studio Library (For Poses)": {
+        "_call": "callStudioLibrary",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+    },
+    "SetKeyFrame (current min max)": {
+        "_call": "_addKeyFrame",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+    },
+    "Setup HumanIK": {
+        "_call": "setupHIK",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+    },
+    "Camera Tools":{
+      "Add Camera Info HUD": {
+        "_call": "addCameraInfoHUD",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+      },
+      "Add In Out Attr": {
+        "_call": "addInOutAttr",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+      },
+      "removeInOutAttr": {
+        "_call": "removeInOutAttr",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+      },
+      "Playblast Animation Clip": {
+        "_call": "PlayBlast_AnimationClip",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+      },
+      "Remove Camera Info HUD": {
+        "_call": "removeCameraInfoHUD",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+      },
+      "Fill In Out": {
+      "_call": "Fill_In_Out",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "annotation": ""
+      },
+      "Enable Camera Switch": {
+        "_call": "enableCameraSwitch",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+      }
+    },
+    "Zv Parent Master": {
+        "_call": "zvParentMaster",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+     },
+    "Animate Textures": {
+      "_call": "animTexture",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Pose Man": {
+      "_call": "poseMan",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": true,
+      "_annotation": ""
+    },
+    "Cache Import Export": {
+      "_call": "CacheImportExport",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Copy Animation": {
+      "_call": "copyAnimation",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Recover Animation": {
+      "_call": "RecoverAnimation",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Make Playblast": {
+      "_call": "makePlayBlast",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": true,
+      "_annotation": ""
+    },
+    "Enlarge HUD Fonts": {
+      "_call": "EnlargeHUDFonts",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Look Dev": {
+    "SubstanceImporter (Apply to Selected)": {
+        "_call": "substanceImporterApplyToSelected",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+    },
+    "Postfix Hierarchy": {
+      "_call": "postfixHier",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Mark Nano Screen": {
+      "_call": "addAttrNanoScreen",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Proxy & GPU Cache Switch": {
+      "_call": "_proxyCacheSwitch",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Shader Transfer": {
+      "_call": "ShaderTransfer",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "To Redshift": {
+      "_call": "toRedshift",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Texture Reloader": {
+      "_call": "texturesReloader",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Lighting": {
+  "Add Light Flicker": {
+      "_call": "launchLightFlicker",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+  "Fill In Out (Remove Overrides)": {
+      "_call": "fillinout_RO",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+  "Setup Master Scene": {
+      "_call": "_setupMasterScene",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Create Shots": {
+      "_call": "_createShots",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Redshift AOV Tools": {
+      "_call": "RedshiftAOVTools",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "AOV Override Enable (Redshift)": {
+      "_call": "enable_aov_redshift",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Light Translator": {
+      "_call": "ICE_LightTransaltor",
+      "_lang": "",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "TACTIC": {
+    "Sequence Assets": {
+      "_call": "_addAssets",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Asset Explorer": {
+      "_call": "showMainBrowser",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Published Assets": {
+      "_call": "showPublishedAssets",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Logout": {
+      "_call": "Logout",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Rigging": {
+    "Add LD": {
+      "_call": "connectObjects",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false ,
+      "_annotation": ""
+    },
+    "Rig Renamer": {
+      "_call": "rig_renamer",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false ,
+      "_annotation": ""
+    },
+    "Lock UnLock": {
+      "_call": "LockUnLock",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false ,
+      "_annotation": ""
+    },
+    "KK Controllers": {
+      "_call": "kk_controllers",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false ,
+      "_annotation": ""
+    },
+    "Wheel Rigger": {
+      "_call": "WheelRigger",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Transfer Control": {
+      "_call": "Transfer_Controls",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Modeling": {
+    "Delete All Keys": {
+      "_call": "deleteAllKeys",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": "Deletes all keys in Scene"
+    },
+    "Pivot Toolbox": {
+      "_call": "pivotToolbox",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": "pivotToolbox"
+    },
+    "Find Poly Intersections": {
+      "_call": "ICE_findPolyIntersections",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Camera Tool Box": {
+      "_call": "ICE_cameraToolbox",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Select Non-Quads": {
+      "_call": "ICE_selectNonQuads",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Create Rope": {
+      "_call": "Create_Rope",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Sequential Rename": {
+      "_call": "Sequential_Rename",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Spin Faces": {
+      "_call": "spinFaces",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Snap Vertex To Middle Tool": {
+      "_call": "snapVertexToMiddleTool",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Curve Tool": {
+      "_call": "ICE_Curve_Tool",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Generalized Cylinder": {
+      "_call": "Generalized_Cylinder",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Rock Generator": {
+      "_call": "RockGenerator",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Shaders to Groups": {
+        "_call": "sag",
+        "_leaf": true,
+        "_lang": "",
+        "_retire": false,
+        "_annotation": ""
+    }
+  },
+  "Dynamics": {
+    "Bake Instancer": {
+      "_call": "BakeInstancer",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Instance To Geometry": {
+      "_call": "Instance_To_Geometry",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Utilities": {
+    "ICE Scene Check": {
+      "_call": "SceneCheck",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Sunday Pipeline": {
+      "_call": "installSundayPipeline",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "QuickTime": {
+      "_call": "ICE_quickTime",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Copy Object Names": {
+      "_call": "ICE_copyObjNames",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Scene Cleanup": {
+      "_call": "ICE_sceneCleanup",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Fix RenderLayer Out Adjustment Errors": {
+      "_call": "fixRenderLayerOutAdjustmentErrors",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "CharSet": {
+      "_call": "CharSet",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Remove Light Link": {
+      "_call": "REM_lightLink",
+      "_lang": "",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Refresh": {
+      "_call": "refresh",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "AnimClip": {
+      "_call": "AnimClip",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Copy Group Names": {
+      "_call": "ICE_copyGrpNames",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Rename Shaders UI": {
+      "_call": "ICE_renameShadersUI",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Parent To Particles": {
+      "_call": "ParentToParticles",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Playblast": {
+      "_call": "ICE_playBlast",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Transfer UVs": {
+      "_call": "aj_UVTransfer",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Random Selection": {
+      "_call": "RandomSelection",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Tear-off the shelf": {
+      "_call": "tearableShelf",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Shave Node Switcher": {
+      "_call": "ShaveNodeSwitcher",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "Layout": {
+    "Create Layout": {
+      "_call": "_createLayout",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Export Snapshots": {
+      "_call": "exportSnap",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    }
+  },
+  "General": {
+  "Replace Proxies": {
+      "_call": "repPro",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+  "Duplicate Per Frame": {
+      "_call": "duplicatePF",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Scene Bundle": {
+      "_call": "bundleScene",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Save Increment": {
+      "_call": "Save_Increment",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Select By Angle": {
+      "_call": "Select_By_Angle",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Remove Namespace": {
+      "_call": "removeNamespace",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+    },
+    "Name a Material": {
+      "_call": "nameMtl",
+      "_leaf": true,
+      "_lang": "",
+      "_retire": false,
+      "_annotation": ""
+      }
+  }
+}

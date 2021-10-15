@@ -1,0 +1,246 @@
+global proc ICE_findPolyIntersections()
+{
+    python("import site\nsite.addsitedir(r'\\\\ice-sql\\Storage\\repository\\Python_Scripts')");
+    string $pyCommand = "" + 
+    "\ntry:" + 
+    "\n    reload(plugins.Find_Intersection)" + 
+    "\nexcept NameError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.Find_Intersection" +
+    "\nexcept AttributeError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.Find_Intersection" ;
+    python($pyCommand);
+}
+
+
+
+
+/* This is the old mel implementation which is not used because of practicality issues
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//Poly Intersaction 1.0
+//
+//About script.
+//
+//it works with Maya 8, 9, 10.
+//
+//This mel checks and highlights the number of faces Intersecting each other.
+//
+//Select the section of faces from poly object and execute the scritp.
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+proc int ICE_findIntersectionsEdgeInFace(vector $Polygon[], vector $Line[], int $VertexCount)
+{
+  vector $Normal;
+  vector $Intersection;
+  vector $Vector1;
+  vector $Vector2;
+  vector $Point;
+  vector $LineDir;
+  vector $A;
+  vector $B;
+  float $OriginDistance;
+  float $Distance1;
+  float $Distance2;
+  float $Numerator;
+  float $Denominator;
+  float $Dist;
+  float $Angle;
+  float $TempAngle;
+  float $DotProduct;
+  float $VectorsMagnitude;
+  float $Magnitude;
+  int $i;
+  int $Result = false;
+
+  $Normal = <<0,0,0>>;
+  $Point = <<0,0,0>>;
+  $LineDir = <<0,0,0>>;
+  $Angle = 0;
+
+  vector $P2 = $Polygon[2];
+  vector $P1 = $Polygon[1];
+  vector $P0 = $Polygon[0];
+  vector $LineStart = $Line[0];
+  vector $LineEnd = $Line[1];
+
+  $Vector1 = <<$P2.x - $P0.x,$P2.y - $P0.y,$P2.z - $P0.z>>;
+  $Vector2 = <<$P1.x - $P0.x,$P1.y - $P0.y,$P1.z - $P0.z>>;
+  $Normal = <<(($Vector1.y * $Vector2.z) - ($Vector1.z * $Vector2.y)),(($Vector1.z * $Vector2.x) - ($Vector1.x * $Vector2.z)),(($Vector1.x * $Vector2.y) - ($Vector1.y * $Vector2.x))>>;
+  $Magnitude = sqrt(($Normal.x * $Normal.x) + ($Normal.y * $Normal.y) + ($Normal.z * $Normal.z));
+	//print($Magnitude + "\n");
+	if($Magnitude == 0)
+	return false;
+  $Normal = <<$Normal.x / $Magnitude, $Normal.y / $Magnitude, $Normal.z / $Magnitude>>;
+
+  $OriginDistance = -1 * (($Normal.x * $P0.x) + ($Normal.y * $P0.y) + ($Normal.z * $P0.z));
+  $Distance1 = (($Normal.x * $LineStart.x) + ($Normal.y * $LineStart.y) + ($Normal.z * $LineStart.z)) + $OriginDistance;
+  $Distance2 = (($Normal.x * $LineEnd.x) + ($Normal.y * $LineEnd.y) + ($Normal.z * $LineEnd.z)) + $OriginDistance;
+
+  if ($Distance1 * $Distance2 >= 0.0)
+    $Result = false;
+  else {
+    $LineDir = <<$LineEnd.x - $LineStart.x, $LineEnd.y - $LineStart.y, $LineEnd.z - $LineStart.z>>;
+    $Magnitude = sqrt(($LineDir.x * $LineDir.x) + ($LineDir.y * $LineDir.y) + ($LineDir.z * $LineDir.z));
+    $LineDir = <<$LineDir.x / $Magnitude, $LineDir.y / $Magnitude, $LineDir.z / $Magnitude>>;
+    $Numerator = -1 * ($Normal.x * $LineStart.x + $Normal.y * $LineStart.y + $Normal.z * $LineStart.z + $OriginDistance);
+    $Denominator = (($Normal.x * $LineDir.x) + ($Normal.y * $LineDir.y) + ($Normal.z * $LineDir.z));
+    if ($Denominator == 0) {
+      $Intersection = $LineStart;
+    } else {
+      $Dist = $Numerator / $Denominator;
+      $Point = <<($LineStart.x + ($LineDir.x * $Dist)), ($LineStart.y + ($LineDir.y * $Dist)), ($LineStart.z + ($LineDir.z * $Dist))>>;
+      $Intersection = $Point;
+    }
+    for ($i = 0; $i < $VertexCount; $i++) {
+      vector $PI = $Polygon[$i];
+      vector $PI2 = $Polygon[($i + 1) % $VertexCount];
+
+      $A = <<$PI.x - $Intersection.x, $PI.y - $Intersection.y, $PI.z - $Intersection.z>>;
+      $B = <<$PI2.x - $Intersection.x, $PI2.y - $Intersection.y, $PI2.z - $Intersection.z>>;
+
+      $DotProduct = (($A.x * $B.x) + ($A.y * $B.y) + ($A.z * $B.z));
+      $VectorsMagnitude = sqrt(($A.x * $A.x) + ($A.y * $A.y) + ($A.z * $A.z)) * sqrt(($B.x * $B.x) + ($B.y * $B.y) + ($B.z * $B.z));
+      if ($VectorsMagnitude != 0) {
+        float $aco = $DotProduct / $VectorsMagnitude;
+        if ($aco > 1.0)
+          $aco = 1.0;
+        $TempAngle = acos($aco);
+        $Angle = $Angle + $TempAngle;
+      }
+    }
+
+    if ($Angle >= 6.2831852443477334051294219973061)
+      $Result = true;
+  }
+  return $Result;
+}
+
+global proc ICE_findPolyIntersections()
+{
+  string $Selection[] = `filterExpand -sm 34`;
+  string $OBJSel[] = `ls -o -sl`;
+
+    string $ShaderGroup;
+    if (!`objExists "Intersection"`) {
+      string $Shader = `shadingNode -asShader lambert -n "Intersection"`;
+      setAttr ($Shader+".color") -type double3 1 0 0;
+      $ShaderGroup = `sets -renderable true -noSurfaceShader true -empty -name IntersectionSG`;
+      connectAttr -f ($Shader+".outColor") ($ShaderGroup+".surfaceShader");
+    } else
+      $ShaderGroup = "IntersectionSG";
+
+    string $Face;
+    string $Edges[];
+    vector $EdgesVTXStart[];
+    vector $EdgesVTXEnd[];
+    int $eIdx = 0;
+
+    global string $FindIntersectionsFaces[];
+    global string $FindIntersectionsOldShader[];
+    clear $FindIntersectionsFaces;
+    clear $FindIntersectionsOldShader;
+    int $fIdx = 0;
+
+    if (size($Selection) > 1) {      
+      string $OBJ;	
+	for($OBJ in $OBJSel)
+	{	
+		
+  
+      for ($f = 0; $f < size($Selection); $f++) {
+        $Face = $Selection[$f];
+       
+        string $Edge[];
+        string $EdgeB[] = `polyInfo -fe $Face`;
+        tokenize($EdgeB[0], $Edge);
+        for ($i = 2; $i < size($Edge); $i++) {
+          int $Found = 0;
+          for ($j = 0; $j < size($Edges); $j++)
+            if ($Edges[$j] == $Edge[$i])
+              $Found = 1;
+          if ($Found == 0) {
+            $Edges[$eIdx] = $Edge[$i];
+            string $VTX[];
+            string $VTXB[] = `polyInfo -ev ($OBJ+".e["+$Edge[$i]+"]")`;
+            tokenize($VTXB[0], $VTX);
+            float $F[] = `pointPosition -w ($OBJ+".vtx["+$VTX[2]+"]")`;
+            $EdgesVTXStart[$eIdx] = <<$F[0], $F[1], $F[2]>>;
+            float $F[] = `pointPosition -w ($OBJ+".vtx["+$VTX[3]+"]")`;
+            $EdgesVTXEnd[$eIdx] = <<$F[0], $F[1], $F[2]>>;
+            $eIdx++;
+          }
+        }
+      }     
+} 
+
+string $OBJ;
+for($OBJ in $OBJSel)
+{
+
+      for ($f = 0; $f < size($Selection); $f++) {
+        $Face = $Selection[$f];
+       
+        string $Edge[];
+        clear $Edge;
+        string $EdgeB[] = `polyInfo -fe $Face`;
+        tokenize $EdgeB[0] $Edge;
+
+        vector $VTX[];
+        clear $VTX;
+        int $VTXid = 0;
+        string $VTXA[];
+        clear $VTXA;
+        string $VTXB[] = `polyInfo -fv $Face`;
+        tokenize($VTXB[0], $VTXA);
+     
+        for ($i = 2; $i < size($VTXA); $i++) {
+          float $F[] = `pointPosition -w ($OBJ+".vtx["+$VTXA[$i]+"]")`;
+          $VTX[$VTXid] = <<$F[0], $F[1], $F[2]>>;
+          $VTXid++;
+        }
+      
+        for ($E = 0; $E < size($Edges); $E++) {
+          int $Found = 0;
+          for ($i = 2; $i < size($Edge); $i++)
+            if ($Edges[$E] == $Edge[$i])
+              $Found = 1;
+          if ($Found == 0) {
+            vector $Line[2];
+            $Line[0] = $EdgesVTXStart[$E];
+            $Line[1] = $EdgesVTXEnd[$E];
+
+            if (ICE_findIntersectionsEdgeInFace($VTX,$Line,$VTXid) == 1) {
+              string $NewFaces[];
+              string $NewFacesB[] = `polyInfo -ef ($OBJ+".e["+$Edges[$E]+"]")`;
+              tokenize $NewFacesB[0] $NewFaces;
+              for ($j = 2; $j < size($NewFaces); $j++) {
+                $FindIntersectionsFaces[$fIdx] = ($OBJ+".f["+$NewFaces[$j]+"]");
+                $fIdx++;      
+              }
+              $FindIntersectionsFaces[$fIdx] = $Face;
+              $fIdx++;
+            }
+          }
+        }
+      }
+}
+      select -cl;
+      for ($i = 0; $i < size($FindIntersectionsFaces); $i++) {
+	select -r $FindIntersectionsFaces;
+       hyperShade -assign Intersection;
+      }
+    } else
+      error "Please select at least 2 Faces!";
+  }
+
+ICE_findPolyIntersections();
+*/

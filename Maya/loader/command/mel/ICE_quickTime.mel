@@ -1,0 +1,134 @@
+global proc makeQuick()
+{
+	
+	string $Name=`textFieldGrp -q -text name`;
+	string $ImageSeq=`textFieldButtonGrp -q -text ImageSeq`;
+	int $startValue[]=`intFieldGrp -q -v  fieldstartend`;
+	string $save=`textFieldButtonGrp -q -text saveQuick`;
+	string $cmmd="deadlinequicktimegenerator.exe -ExportSettings "+"\""+"c:\\export.xml"+"\""+" "+"\""+"QuickTime Movie"+"\"";
+	string $cmmd2="deadlinequicktimegenerator.exe -CreateMovie "+"\""+$ImageSeq+"\""+" "+"\""+"c:\\export.xml"+"\""+" "+$startValue[0]+" "+$startValue[1]+" 25"+" "+"\""+$save+"\\"+$Name+".mov"+"\"";
+	system($cmmd);
+	system($cmmd2);
+	confirmDialog -title "Information" -message "Quick Time Created !!!"  -button "OK"  -defaultButton "OK";
+ 	close();
+
+}
+
+global proc BrowseImages()
+{	
+	fileBrowserDialog -m 0 -fc "SetBrowseImages" -an "Browse Side Kicks" -ft "image" -om "Import";
+}
+
+global proc SetBrowseImages(string $filename, string $fileType)
+{
+	global string $ImagesPathGrp;
+	textFieldButtonGrp -e -text $filename $ImagesPathGrp;
+
+}
+
+global proc savepath()
+{
+
+	global string $SaveMove;
+	string $newdir = BrowseSave( "-getdirectory \"" + `textFieldButtonGrp -q -text $SaveMove` + "\"" );
+	if( $newdir != "" )
+		textFieldButtonGrp -e -text $newdir $SaveMove;
+
+	//fileBrowserDialog -m 0 -fc "setSaveMove" -an "Browse Side Kicks" -ft "image" -om "Import";
+}
+
+global proc string BrowseSave( string $command )
+{
+
+	string $result = system("deadlinecommand " + $command );
+	$result = substituteAllString( $result, "\r", "" );
+	
+	string $resultArray[];
+	$resultArray = stringToStringArray( $result, "\n" );
+	if( size($resultArray) > 2 && startsWith( $resultArray[2], "UNC paths are not supported." ) )
+	{
+		int $tempResultArraySize = size($resultArray) - 3;
+		string $tempResultArray[];
+		for( $i = 0; $i < $tempResultArraySize; $i++ )
+			$tempResultArray[$i] = $resultArray[$i+3];
+		$result = stringArrayToString( $tempResultArray, "\n" );
+	}
+	
+	if( endsWith( $result, "\n" ) )
+		$result = substring( $result, 1, size( $result ) - 1 );
+	
+	return $result;
+}
+
+
+
+global proc setSaveMove(string $filename, string $fileType)
+{
+	global string $SaveMove;
+	textFieldButtonGrp -e -text $filename $SaveMove;
+
+
+}
+
+
+
+global proc ICE_quickTime()
+{
+	
+	if(`window  -ex quickTime`==1)
+	{
+		deleteUI -window quickTime;
+		 quicktime();
+	}
+	else
+	{
+		 quicktime();
+	}
+}
+
+global proc close()
+{
+	deleteUI -window quickTime;
+
+}
+global proc quicktime()
+{
+	string $projectPath=`workspace -q -fn`;	
+	global string $ImagesPathGrp;
+	global string $SaveMove;
+	string $QuickTime = `window -title "ICE Animations-Quick Time Maker" -iconName "Short Name" -w 500 -h 250 quickTime `;
+
+		columnLayout -adjustableColumn true;
+			//image -image "C:/Documents and Settings/umair.ahmed/Desktop/QuicktimeMovie/qtm.jpg" -h 50;
+ 	               image -image "P:/channelx/qawwals/assets/props/Icons/qtm.jpg" -h 50;
+
+		setParent..;
+
+		frameLayout -label "Job Description" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable false;
+			columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4;
+				textFieldGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Name of Movie" -annotation "Write Name of Move File"  -text  "" name;
+				$ImagesPathGrp=`textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Load Images" -text ""  -buttonLabel "..."  -annotation "Use this to load Images"  ImageSeq`;
+						textFieldButtonGrp -e -bc BrowseImages $ImagesPathGrp;
+				intFieldGrp -cal 1 "left"   -numberOfFields 2  -label "Start/End:" -extraLabel "Frames" -annotation "write Start and End Frames Of Movie"  -value1 3 -value2 5 fieldstartend ;
+				$SaveMove=`textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Save As" -fileName $projectPath  -buttonLabel "..."  -annotation "Use this to Save Movie File "  saveQuick`;
+						textFieldButtonGrp -e -bc savepath $SaveMove;
+
+			setParent..;
+		setParent..;
+
+		columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4 buttonColumnLayout;
+				rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+
+					button -label "QuickTime" -width 110 -height 26 -align "center" -c makeQuick;
+					button -label "Close" -width 110 -height 26 -align "center" -c close;
+
+
+				setParent..;
+		setParent..;
+
+
+
+	showWindow $QuickTime;
+}
+
+

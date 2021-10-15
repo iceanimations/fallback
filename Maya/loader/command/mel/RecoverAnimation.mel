@@ -1,0 +1,59 @@
+global proc animConnect()
+{
+	
+	string $selection[] =`ls -sl`;
+	for ($object in $selection)
+	{
+		//print ($object + "\n");
+		string $animAttr[] = `listAttr -k -s -m $object`;
+		int $i=`size($animAttr )`;
+		textScrollList  -e -a ($i + "-" + "AnimCurve node connected to >>>>" + $object) selectedobject;
+		
+			for ($each in $animAttr)
+			{		
+					
+					string $animCurveNode = $object + "_" + $each;
+					//print ($animCurveNode + "\n"); 
+					string $objectAttr = $object + "." + $each;
+					//print ($objectAttr + "\n");
+					int $animCurveNodeExists = `objExists $animCurveNode`;
+						if (!$animCurveNodeExists)
+								{
+									textScrollList -e -a ($animCurveNode+">>" + ("     Animation not exists" )) unlisted;
+								}
+						else
+								{
+									connectAttr -f ($animCurveNode + ".output") $objectAttr;
+									
+								}	
+			}
+	
+	}
+	
+	
+	text " ";
+	text "designed and developed by Premod P Sankar";
+	text "premodmultimedia@gmail.com";
+
+}
+
+global proc animDataRecovery()
+{
+	if ((`window -ex dataRecovery`)==true)
+		deleteUI dataRecovery;
+	
+	string $window =`window -t "AnimCurve Data Recovery Tool" -w 300 -h 200 -s 1 dataRecovery` ;
+	columnLayout -adj 1;
+	text -al "center" -h 30 -l"Anim Curve Node Count List";
+	textScrollList -ams true -h 200 selectedobject;
+	text " ";
+		button -h 50 -l "Restore Animation" -c animConnect;
+		text -h 30 -l "Non connected Node list" ;
+	textScrollList -ams true -h 100 unlisted;
+	
+	showWindow $window;
+}
+global proc RecoverAnimation()
+{
+	animDataRecovery;
+}

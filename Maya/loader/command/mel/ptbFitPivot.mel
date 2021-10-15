@@ -1,0 +1,61 @@
+/* ptbFitPivot.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date:	22.05.1998
+Last Update:	13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbFitPivot ()
+{
+	int $count;
+	string $objList[] = `ptb_filterTransforms`;
+	int $num = `size ($objList)`;
+	if ($num < 2)
+		error "This functions requires two or more objects to be selected";
+	else
+	{
+		$num -= 1;
+		float $sPiv[3] = `xform -q -ws -sp $objList[$num]`;
+		float $rPiv[3] = `xform -q -ws -rp $objList[$num]`;
+
+		for ($count = $num; $count > 0; $count--)
+		{
+			float $sOld[3] = `xform -q -ws -sp $objList[$count-1]`;
+			float $rOld[3] = `xform -q -ws -rp $objList[$count-1]`;
+			if (`checkBox -q -value ptb3_xbox`)
+			{
+				$sOld[0] = $sPiv[0];
+				$rOld[0] = $rPiv[0];
+			}
+			if (`checkBox -q -value ptb3_ybox`)
+			{
+				$sOld[1] = $sPiv[1];
+				$rOld[1] = $rPiv[1];
+			}
+			if (`checkBox -q -value ptb3_zbox`)
+			{
+				$sOld[2] = $sPiv[2];
+				$rOld[2] = $rPiv[2];
+			}
+
+			if (`checkBox -q -value ptb3_spBox`)
+				xform -ws -sp $sOld[0] $sOld[1] $sOld[2] $objList[$count-1];
+			if (`checkBox -q -value ptb3_rpBox`)
+				xform -ws -rp $rOld[0] $rOld[1] $rOld[2] $objList[$count-1];
+		}
+	}
+}
+
+// end of script
+

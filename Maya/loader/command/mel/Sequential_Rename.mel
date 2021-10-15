@@ -1,0 +1,9 @@
+source "R:/Pipe_Repo/Users/Hussain/scripts/copied_elsewhere/scrips/mix_script/js_grepRename.mel";
+source "R:/Pipe_Repo/Users/Hussain/scripts/copied_elsewhere/scrips/mix_script/js_grepRenameUI.mel";
+source "R:/Pipe_Repo/Users/Hussain/scripts/copied_elsewhere/scrips/mix_script/js_hashRename.mel";
+source "R:/Pipe_Repo/Users/Hussain/scripts/copied_elsewhere/scrips/mix_script/js_hashRenameUI.mel";
+source "R:/Pipe_Repo/Users/Hussain/scripts/copied_elsewhere/scrips/mix_script/js_renameGeoAsParent.mel";
+source "R:/Pipe_Repo/Users/Hussain/scripts/copied_elsewhere/scrips/mix_script/js_replaceHash.mel";
+
+global proc Sequential_Rename(){
+  js_hashRenameUI;}

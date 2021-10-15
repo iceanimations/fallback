@@ -1,0 +1,22 @@
+global proc removeInOutAttr()
+{
+	$selection = `ls -sl`;
+	
+	if(size($selection)==0)
+	{
+		warning("please select a camera to remove in out attributes from...\n");
+		return;
+	}
+
+	for ($sel in $selection)
+	{
+
+		$camShapes = `listRelatives -shapes $sel`;
+
+		if(`attributeExists "in" $camShapes[0]`==1)
+			catch (`deleteAttr -attribute "in" $camShapes[0]`);
+
+		if(`attributeExists "out" $camShapes[0]`==1)
+			catch (`deleteAttr -attribute "out" $camShapes[0]`);
+	}
+}

@@ -1,0 +1,1769 @@
+
+
+
+/***************************************************************************	Nuke Mode *******************************************************************************/
+
+
+global proc nuke_job_info(		string 	$path,
+					string 	$JobName,
+					string 	$Comments,
+					string 	$Pool,
+					int 		$Priority,
+					int 		$ConcurrentTasks,
+					string 	$JobDependencies,
+					string 	$Frames,
+					string		$TaskSize
+				)
+{
+
+	string $submitFilename = ( $path + "/nuke_job_info.job" );
+
+	$fileId = `fopen $submitFilename "w"`;
+
+	if( $fileId == 0 )
+		print( "Error in Deadline Submission Script: could not create " + $submitFilename + "\n" );
+	
+
+	fprint $fileId ( "Plugin=Nuke\n" );
+	fprint $fileId ( "Name=" + $JobName + "\n" );
+	fprint $fileId ( "Comment=" + $Comments + "\n" );
+	fprint $fileId ( "Pool=" + $Pool + "\n" );
+	fprint $fileId ( "Priority=" + $Priority + "\n" );
+	fprint $fileId ( "ConcurrentTasks="+$ConcurrentTasks+"\n");
+	if($JobDependencies !="")
+		{
+				fprint $fileId ("JobDependencies="+$JobDependencies+"\n");
+
+		}
+	
+	fprint $fileId ( "Frames=" + $Frames+ "\n" );
+	fprint $fileId ( "ChunkSize=" + $TaskSize+ "\n" );
+   
+	fclose $fileId;
+
+
+
+}
+
+
+global proc nuke_plugin_info(string $path,string $Filepath)
+{
+
+	string $submitFilename =( $path + "/nuke_plugin_info.job" );
+	$fileId = `fopen $submitFilename "w"`;
+	if( $fileId == 0 )
+		print( "Error in Deadline Submission Script: could not create " + $submitFilename + "\n" );
+	
+	fprint $fileId ( "SceneFile="+$Filepath+"\n" );
+	fprint $fileId ( "Version="+ 5 +"\n" );
+	fprint $fileId ( "Threads="+ 0 +"\n" );
+	fprint $fileId ( "RamUse="+ 0 +"\n" );
+	fclose $fileId;
+
+
+
+}
+global proc string nukeJobSubmission(string $jobfile,string $infofile)
+{
+			
+	string $command=("deadlinecommandbg"+" "+$jobfile+" "+$infofile);
+	string $result=system($command);
+	return $result;
+}
+
+
+global proc WriteNukeFile(string $project_path, string $proj, string $shot, string $frames,int $count)
+{
+	string $frame_ranges[];
+	global int $EnvFlagg;
+	global int $cam_status[];
+	global string $kurtaname;
+	int $value=`checkBox -q -v Nukrender`;
+	//string $filepath="R:/Nuke_Scripts/Banka_Scripts/"+$kurtaname+"_bankay_shot_comp.nk";
+
+	string $filepath="R:/Nuke_Scripts/Banka_Scripts/updated_banka_new_master.nk";
+	int $filecheck=`file -q -ex $filepath`;
+	if($value==1 && $filecheck==1)
+	{
+		$tokens = `tokenize $frames ",-" $frame_ranges`;
+	float $mn, $mx, $env_mn, $env_mx;
+
+	if($tokens>1)
+	{	
+		float $x =  $frame_ranges[0]; float $y = $frame_ranges[1];
+		$mn=`min $x $y`;
+		$mx=`max $x $y`;
+
+		for($frame in $frame_ranges)
+		{
+			float $ff = $frame;
+			$mn=`min $mn $ff`;
+			$mx=`max $mx $ff`;
+		}
+	}
+
+	if($EnvFlagg==1)
+	{
+		if($cam_status[$count-1]==0)
+		{
+
+			$env_mn=$mn;
+			$env_mx=$mn;
+
+		}
+		else
+		{
+
+			$env_mn=$mn;
+			$env_mx=$mx;
+
+
+		}
+
+
+	}
+	else
+	{
+		$env_mn=$mn;
+		$env_mx=$mx;
+	}
+
+	if(endsWith($project_path, "/"))
+		$project_path = startString($project_path, size($project_path)-1);
+
+	//$nukeScriptName = ("R:/Nuke_Scripts/Banka_Scripts/green_bankay_shot_comp.nk");
+
+	$nukeScriptName = ("R:/Nuke_Scripts/Banka_Scripts/banka.nk");
+	$fileId=`fopen $nukeScriptName "r"`;
+	string $nextLine = `fgetline $fileId`;
+	string $buffer;
+	while(size($nextLine) > 0)
+	{
+		if(size(`match "^set PROJECT (.^\n)*" $nextLine`)>0)
+			$buffer += ("set PROJECT "+$proj+"\n");
+		else if(size(`match "^set SHOT (.^\n)*" $nextLine`)>0)
+			$buffer += ("set SHOT "+$shot+"\n");
+		else if(size(`match "^set PROJECT_PATH (.^\n)*" $nextLine`)>0)
+			$buffer += ("set PROJECT_PATH "+$project_path+"\n");
+		else if(size(`match "^set FIRST_FRAME (.^\n)*" $nextLine`)>0)
+			$buffer += ("set FIRST_FRAME "+$mn+"\n");
+		else if(size(`match "^set LAST_FRAME (.^\n)*" $nextLine`)>0)
+			$buffer += ("set LAST_FRAME "+$mx+"\n");
+		else if(size(`match "^set FIRST_ENV_FRAME (.^\n)*" $nextLine`)>0)
+			$buffer += ("set FIRST_ENV_FRAME "+$env_mn+"\n");
+		else if(size(`match "^set LAST_ENV_FRAME (.^\n)*" $nextLine`)>0)
+			$buffer += ("set LAST_ENV_FRAME "+$env_mx+"\n");
+		else
+			$buffer += ($nextLine);
+		$nextLine = `fgetline $fileId`;
+	}
+
+	fclose $fileId;
+
+	sysFile -md ($project_path+"/2D");
+	sysFile -md ($project_path+"/Output");
+	sysFile -md ($project_path+"/Output/TGAs_nuke_render");
+	$fileId = `fopen ($project_path+"/2D/"+$proj+"_"+$shot+"_nuke.nk") "w"`;
+	fprint $fileId $buffer;
+	fclose $fileId;
+	
+	}
+	
+	else
+	{
+		error "Nuke Reference file is Absent.......";
+		return;
+	}
+	
+
+	
+}
+
+
+global proc NukeRender()
+{
+
+	
+	
+	global string $JobNames[];
+	global string $ProDir[];
+	global string $OutDir[];
+	global string $Comments[];
+	global string $FrameLists[];
+	global string $TaskSizes[];
+       global string $jobIds[];
+	global int $layerCount;
+	string $camera;
+	int $count=1;
+	string $rendercameras[] = `textScrollList -q -ai  pathList2`;
+
+	int  $dep=`checkBox -q -v depend`;
+	if($dep == 0)
+	{
+		for($camera in $rendercameras)
+		{
+			string $buffer[];
+			$numTokens = `tokenize $OutDir[$count] "//" $buffer`;
+			string $shot=($buffer[size($buffer)-1]);
+			WriteNukeFile($ProDir[$count], ProjectName(), $shot, $FrameLists[$count],$count);
+			nuke_job_info( $ProDir[$count],$JobNames[$count],$Comments[$count],"safe_blades",50,2,"",$FrameLists[$count],"25");
+			nuke_plugin_info($ProDir[$count],$ProDir[$count]+"2D/"+ProjectName()+"_"+$shot+"_nuke.nk");
+			nukeJobSubmission(($ProDir[$count]+"/nuke_job_info.job"),($ProDir[$count]+"/nuke_plugin_info.job"));
+			$count +=1;
+		}
+
+
+	}
+
+	else
+	{
+
+		for($camera in $rendercameras)
+		{
+			string $buffer[];
+			$numTokens = `tokenize $OutDir[$count] "//" $buffer`;
+			string $shot=($buffer[size($buffer)-1]);
+			WriteNukeFile($ProDir[$count], ProjectName(), $shot, $FrameLists[$count],$count);
+			nuke_job_info($ProDir[$count],$JobNames[$count],$Comments[$count],"safe_blades",50,2,$jobIds[$count],$FrameLists[$count],"25");
+			nuke_plugin_info($ProDir[$count],$ProDir[$count]+"2D/"+ProjectName()+"_"+$shot+"_nuke.nk");
+			nukeJobSubmission(($ProDir[$count]+"/nuke_job_info.job"),($ProDir[$count]+"/nuke_plugin_info.job"));
+			$count +=1;
+		}
+	}
+
+	
+
+
+}
+
+
+
+
+
+/***********************************************************************************************************************************************************************************************************/
+
+global proc int checkCache()
+{
+	string $cacheName=basename(`file -q -sn`, "")+"_bankay_skinned_01_hair_bankay_hair_hairSystemShape1.mchp";
+	string $getProject=`workspace -q -fn`+"/data";
+	string $filepath=$getProject+"/"+$cacheName;
+	if(`file -q -ex $filepath`==0)
+	{
+		confirmDialog -t "Information" -ma "center" -m "Cache does not exist or cache name is not correct!" -b "Continue" -defaultButton "Continue";
+
+		return 0;
+
+	}
+
+	return 1;
+
+
+}
+
+
+global proc string ProjectName()
+{
+	string $buffer[];
+	string $bufferr[];
+	string $SceneName=`workspace -q -fn`;
+	$numTokens = `tokenize $SceneName"/" $buffer`;
+	int $length=size($buffer);
+	string $result=$buffer[$length-1];
+	return $result;
+}
+
+
+
+global proc setArrays()
+{
+
+	global string $JobNames[];
+	global string $ProDir[];
+	global string $OutDir[];
+	global string $Comments[];
+	global string $FrameLists[];
+	global string $TaskSizes[];
+	global string $itemarrays[];
+	global string $jobIds[];
+	global int $cam_status[];
+	global string $pool[];
+
+
+
+	clear $JobNames;
+	clear $ProDir;
+	clear $OutDir;
+	clear $Comments;
+	clear $FrameLists;
+	clear $TaskSizes;
+	clear $itemarrays;
+	clear $jobIds;
+	clear $cam_status;
+	clear $pool;
+
+}
+
+
+//*********************************************Job Submission to DeadLine******************************************************//
+
+global proc sendrender()
+{		
+		if(`checkBox -q -v CheckCache`==1)
+		{
+			if(!checkCache())
+			{
+				error("Set Cache and then render again!\n");
+				return;
+			}
+		}
+		
+		checkCam();
+		global string $jobIds[];
+		clear $jobIds;
+		string $renderLayerList[] = `ls -exactType "renderLayer"`;
+		string $currentRenderLayer = `editRenderLayerGlobals -query -currentRenderLayer`;
+
+		int $len=size($renderLayerList);
+		
+
+		if($len>1 && $currentRenderLayer !="defaultRenderLayer")
+		{
+			renderlayers();
+			confirmDialog -title "Submission Results" -message "All Jobs Submitted Successfully " -button "Ok";					
+		}
+		else if($currentRenderLayer =="defaultRenderLayer")
+		{
+			sendrenderr("default");
+			confirmDialog -title "Submission Results" -message "All Jobs Submitted Successfully " -button "Ok";					
+
+		}
+		deleteUI -window icedisplay;
+}
+
+global proc renderlayers()
+	{
+
+		int $submitCounter = 0;
+  		global int $layerCount=0;
+		// Store the currently selected render layer
+		string $currentRenderLayer = `editRenderLayerGlobals -query -currentRenderLayer`;
+		string $renderLayerList[] = `ls -exactType "renderLayer"`;
+		// Loop through the render layer if the checkbox is on
+		for( $i = 0; $i <size( $renderLayerList ); $i++ )
+		{
+					
+			// Submit only if the renderable attribute is on
+			$renderable = `getAttr( $renderLayerList[$i] + ".renderable" )`;
+			int $vall= `gmatch $renderLayerList[$submitCounter] "*defaultRenderLayer*"`;
+			int $valll=`gmatch $renderLayerList[$submitCounter] "*:*"`;
+		
+			if($renderable==1 && $vall==0 && $valll==0)
+			{
+			
+				// Select the render layer to make sure the render settings are updated
+				editRenderLayerGlobals -currentRenderLayer $renderLayerList[$i];
+				$renderer = currentRenderer();
+
+					if($vall==0 && $valll==0 )
+					{
+						
+						sendrenderr($renderLayerList[$submitCounter]);
+						$layerCount +=1;
+
+						
+						
+					}
+					else
+					{
+						print ($renderLayerList[$submitCounter]+"\n"+"This Layer Cannot be Render");
+						
+					}
+
+				
+						
+					
+			}
+			$submitCounter++;
+		}
+		
+		int $nrender=`checkBox -q -v Nukrender`;
+		if($nrender !=0)
+		{
+			NukeRender();		
+		}
+		
+
+	}
+
+
+global proc string  padding(string $input)
+{
+
+	string $result;
+	 int $inputt=$input;
+
+	 if($inputt<=9)
+	{
+		$result="0"+$input;
+	}
+	else{
+	 string $strnum;
+	/* int $number=$inputt/1000;
+	 $result=$number;
+	 $number=$inputt/100;
+	 $number=$inputt/100;
+	 $result=$result+$number;*/
+	 float $numb =$inputt/10;
+	 if($numb>0)
+	{
+		$result=$result+$input;
+
+       }
+	  }
+	return $result;
+
+}
+global proc string GetImageDirectory()
+{
+	// Relative path, get the project's image directory.
+	string $fileRules[] = `workspace -q -renderType`;
+	string $imageDir = "";
+	for( $i = 0; $i < size( $fileRules ); $i += 2 )
+	{
+		if( $fileRules[$i] == "images" )
+		{
+			$imageDir = $fileRules[$i+1];
+			break;
+		}
+	}
+
+	string $path;
+	$path = `workspace -q -fullName`;
+	if( substring( $path, size( $path ), size( $path ) ) != "\\" && substring( $path, size( $path ), size( $path ) ) != "/" )
+		$path = $path + "/";
+
+	if( $imageDir == "" )
+		return $path;
+
+	if( substring( $imageDir, size( $imageDir ), size( $imageDir ) ) != "\\" && substring( $imageDir, size( $imageDir ), size( $imageDir ) ) != "/" )
+		$imageDir = $imageDir + "/";
+	
+	// Check for an absolute path in the image directory.
+	if( substring( $imageDir, 1, 1 ) == "/" || substring( $imageDir, 1, 1 ) == "\\" || substring( $imageDir, 2, 2 ) == ":" )
+		$path = $imageDir;
+	else
+		$path = $path + $imageDir;
+		
+	return $path;
+}
+
+global proc comments()
+{
+	global string $Comments[];
+	global string $comments;
+	int $nmberr[]=eval("textScrollList -q -sii  pathList2");
+	int $ind=$nmberr[0];
+	$comments = `textFieldGrp -q -text CommentsGrp`;
+	$Comments[$ind]=$comments;
+
+
+
+}
+global proc tasksize()
+{
+
+	global string $tasksize;
+	global string $TaskSizes[];
+	int $nmberr[]=eval("textScrollList -q -sii  pathList2");
+	int $ind=$nmberr[0];
+	$tasksize = `textFieldGrp -q -text TaskSize`;
+	$TaskSizes[$ind]=$tasksize;
+
+
+}
+
+global proc JobNames()
+{
+
+	global string $jobnames;
+	global string $JobNames[];
+	int $nmberr[]=eval("textScrollList -q -sii  pathList2");
+	int $ind=$nmberr[0];
+	$jobnames = `textFieldGrp -q -text jobNameGrp`;
+	print $jobnames;
+	$JobNames[$ind]=$jobnames;
+
+
+}
+
+global proc framelist()
+{
+	global string $framelist;
+	global string $FrameLists[];
+	int $nmberr[]=eval("textScrollList -q -sii  pathList2");
+	int $ind=$nmberr[0];
+	$framelist = `textFieldGrp -q -text FrameListGrp`;
+	$FrameLists[$ind]=$framelist;
+
+
+}
+
+
+global proc ProSettings()
+{
+
+	global string $ProjectPathGrp;	
+	global string $ProDir[];
+	global int $count1;
+	string $ProjectDir = CheckSlashes(`textFieldButtonGrp -q -text $ProjectPathGrp`);
+	$ProDir[$count1]=$ProjectDir;
+	$count1=$count1+1;
+
+}
+
+global proc OutSettings()
+{
+	global string $ImageOutputPathGrp;
+	global string $OutDir[];
+	global int $count;
+	string $OutputDir = CheckSlashes(`textFieldButtonGrp -q -text $ImageOutputPathGrp`);
+	$OutDir[$count]=$OutputDir;
+	$count=$count+1;
+
+}
+
+global proc OutSettingss()
+{
+  global string $ImageOutputPathGrp;
+  global string $OutDir[];
+  int $nmberr[]=eval("textScrollList -q -sii  pathList2");
+  int $ind=$nmberr[0];
+  string $OutputDir = CheckSlashes(`textFieldButtonGrp -q -text $ImageOutputPathGrp`);
+  $OutDir[$ind]=$OutputDir;
+  
+
+}
+
+global proc ProSettingss()
+{
+
+  global string $ProjectPathGrp;	
+  global string $ProDir[];
+  int $nmberr[]=eval("textScrollList -q -sii  pathList2");
+  int $ind=$nmberr[0];
+  string $ProjectDir = CheckSlashes(`textFieldButtonGrp -q -text $ProjectPathGrp`);
+  $ProDir[$ind]=$ProjectDir;
+}
+
+
+
+global proc int GetMotionBlur()
+{
+	string $renderer = GetCurrentRenderer();
+	
+	int $mb = false;
+	if( $renderer == "mentalRay" )
+		$mb = `getAttr miDefaultOptions.motionBlur`;
+	else if( $renderer == "mayaHardware" )
+		$mb = `getAttr hardwareRenderGlobals.enableMotionBlur`;
+	else if( $renderer == "mayaVector" )
+		$mb = false;
+	else if( $renderer == "turtle" )
+		$mb = `getAttr TurtleRenderOptions.motionBlur`;
+	else if( $renderer == "renderMan" )
+		$mb = `getAttr renderManGlobals.rman__torattr___motionBlur`;
+	else if( $renderer == "finalRender" )
+		$mb = `getAttr defaultFinalRenderSettings.motionBlur`;
+	else if( $renderer == "vray" )
+		$mb = `getAttr vraySettings.cam_mbOn`;
+	else
+		$mb = `getAttr defaultRenderGlobals.motionBlur`;
+	
+	return $mb;
+}
+
+global proc string StripPathAndExt( string $fullFileName )
+{
+	string $fileNameNoPath = match( "[^/\\]*$", $fullFileName );
+	string $fileNameOnly = match( "[^\.]*", $fileNameNoPath );
+	
+	return $fileNameOnly;
+}
+
+global proc string GetMayaOutputPrefix()
+{
+	string $prefix = "";
+	
+	string $renderer = GetCurrentRenderer();
+	if( $renderer != "vray" )
+		$prefix = `getAttr defaultRenderGlobals.imageFilePrefix`;
+	else
+		$prefix = `getAttr vraySettings.fileNamePrefix`;
+	
+	if( $prefix == "" )
+		$prefix = StripPathAndExt( `file -q -sceneName` );
+	
+	return $prefix;
+}
+
+
+// Returns global resolution.
+global proc int[] GetGlobalsResolution()
+{
+	int	$res[2] = { 320, 240 };
+	
+	string $renderer = GetCurrentRenderer();
+	if( $renderer != "vray" )
+	{
+		string $globals[] = `ls -renderGlobals`;
+		if( size( $globals[0] ) > 0 )
+		{
+			string $connect[] = `listConnections ($globals[0] + ".resolution")`;
+			if( size( $connect[0] ) > 0 )
+			{
+				$res[0] = `getAttr ( $connect[0] + ".width" )`;
+				$res[1] = `getAttr ( $connect[0] + ".height" )`;
+			}
+		}
+	}
+	else
+	{
+		$res[0] = `getAttr vraySettings.width`;
+		$res[1] = `getAttr vraySettings.height`;
+	}
+	
+	return $res;
+}
+
+global proc string GetCurrentRenderer()
+{
+	return currentRenderer();
+}
+global proc RenderGlobal()
+{
+     setAttr "defaultRenderGlobals.extensionPadding" 4;
+     setAttr defaultRenderGlobals.animation 1;
+
+}
+
+global proc sendrenderr(string $layername)
+{
+  RenderGlobal();
+  global string $ProDir[];
+  global string $OutDir[];
+  global string $JobNames[];
+  global string $Comments[];
+  global string $FrameLists[];
+  global string $TaskSizes[];
+  global string $jobIds[];
+  global string $pool[];
+  global int $cam_status[];
+
+  global int $EnvFlagg;
+
+  global int $count;
+  $count=1;
+
+  global string $ProjectPathGrp;
+  global string $ImageOutputPathGrp;
+  string $rendercameras[] = `textScrollList -q -ai  pathList2`;
+  string $camera;
+  string $pathdir;
+  string $username="Submitted By "+Username();
+  global int $inc=1;
+  int $jobsize=size($rendercameras);
+  int $updatesize=100/$jobsize;
+  
+  for ($camera in $rendercameras)
+	{	
+
+		if($TaskSizes[$count]=="")
+		{
+			
+			$TaskSizes[$count]=25;
+		}
+		if($layername=="default")
+		{
+			sysFile -makeDir $OutDir[$count] ;
+			$pathdir=$OutDir[$count] ;
+			$layername=SceneName();
+
+
+		}
+		else
+		{
+
+		sysFile -makeDir $OutDir[$count];
+		$pathdir=$OutDir[$count]+"/"+$layername;
+		sysFile -makeDir $pathdir;
+
+
+		}
+
+
+		string $filenam;
+   		string $filename= GetOutputPrefix();
+
+		if(`attributeExists "env" $layername`)
+		{
+			
+			string $cmmdlayer="getAttr "+$layername+".env";
+			int $val= eval($cmmdlayer);
+			if($val==1)
+			{
+				//print($count+"\n");
+				//print("executed value is true \n");
+				//print($layername+"\n");
+				global int $cam_count;
+				if($cam_status[$count-1]==0)			
+				{
+					//print("cam status check is false \n");
+					//print($cam_status[$count]+"\n");
+					
+					string $buffer[];
+					string $flist=$FrameLists[$count];
+					$numTokens = `tokenize $flist "-" $buffer`;
+					$EnvFlagg=1;
+					$jobIds[$count]=$jobIds[$count]+WriteJobFilesAndSubmitt($pool[$count], currentRenderer(), 0, $OutDir[$count], $buffer[0],$JobNames[$count]+"-"+$layername,$Comments[$count],$ProDir[$count],$camera, "1",$layername)+",";
+
+				}
+				if($cam_status[$count-1]==1)
+				{
+					//print("cam status check is True \n");
+					//print($cam_status[$count]+"\n");
+					$jobIds[$count]=$jobIds[$count]+WriteJobFilesAndSubmitt( $pool[$count],currentRenderer(), 0, $OutDir[$count], $FrameLists[$count],$JobNames[$count]+"-"+$layername,$Comments[$count],$ProDir[$count],$camera, $TaskSizes[$count],$layername)+",";
+				}
+
+			}
+			else
+			{
+				//print("executed value is true2 \n");
+
+				$jobIds[$count]=$jobIds[$count]+WriteJobFilesAndSubmitt( $pool[$count],currentRenderer(), 0, $OutDir[$count], $FrameLists[$count],$JobNames[$count]+"-"+$layername,$Comments[$count],$ProDir[$count],$camera, $TaskSizes[$count],$layername)+",";
+
+			}
+			
+			$inc +=1;
+			$count=$count+1;
+
+		}
+		else
+		{
+
+		
+		$jobIds[$count]=$jobIds[$count]+WriteJobFilesAndSubmitt( $pool[$count],currentRenderer(), 0, $OutDir[$count], $FrameLists[$count],$JobNames[$count]+"-"+$layername,$Comments[$count],$ProDir[$count],$camera, $TaskSizes[$count],$layername)+",";
+		$inc +=1;
+		$count=$count+1;
+
+		}
+
+     		
+		
+		
+
+
+	}
+
+
+   	progressBar -edit -step $updatesize  Overallprogress;
+	
+
+}
+
+
+global proc checkCam()
+{
+	
+	global int $cam_status[];
+	string $rendercameras[] = `textScrollList -q -ai  pathList2`;
+	string $camera;
+	global int $cam_count;
+	int $flag[];
+	for ($camera in $rendercameras)
+	{
+			
+		string $cmd="getAttr "+$camera+".in";
+		string $cmd2="getAttr "+$camera+".out";
+		int $in=eval($cmd);
+		int $out=eval($cmd2);
+		int $mid=floor(($out+$in)/2);
+		int $counter;
+		int $counter=1;
+		string $Pcameraa[]=`listRelatives -p $camera`;
+		string $Pcamera=$Pcameraa[0];
+			
+		for($counter;$counter<=3;$counter++)
+		{
+			if($counter==1)
+			{
+				$in=$in;
+			}
+			if($counter==2)
+			{
+				$in=$mid;
+			}
+			if($counter==3)
+			{
+				
+				$in=$out-1;
+			}
+
+
+			string $ctcmd ="currentTime -edit "+ $in;
+			eval($ctcmd);
+
+			//currentTime -edit ($in);
+			
+			string $cameraCmdTX="getAttr "+$Pcamera+".translateX";
+			string $cameraCmdTY="getAttr "+$Pcamera+".translateY";
+			string $cameraCmdTZ="getAttr "+$Pcamera+".translateZ";
+			string $cameraCmdRX="getAttr "+$Pcamera+".rotateX";
+			string $cameraCmdRY="getAttr "+$Pcamera+".rotateY";
+			string $cameraCmdRZ="getAttr "+$Pcamera+".rotateZ";
+
+			float $flagTX=eval($cameraCmdTX);
+			float $flagTY=eval($cameraCmdTY);
+			float $flagTZ=eval($cameraCmdTZ);
+			float $flagRX=eval($cameraCmdRX);
+			float $flagRY=eval($cameraCmdRY);
+			float $flagRZ=eval($cameraCmdRZ);
+			
+			
+			//currentTime -edit ($in+1);
+			string $cttcmd="currentTime -edit "+($in+1);
+			eval($cttcmd);
+			
+
+
+			string $cameraCmdTX1="getAttr "+$Pcamera+".translateX";
+			string $cameraCmdTY1="getAttr "+$Pcamera+".translateY";
+			string $cameraCmdTZ1="getAttr "+$Pcamera+".translateZ";
+			string $cameraCmdRX1="getAttr "+$Pcamera+".rotateX";
+			string $cameraCmdRY1="getAttr "+$Pcamera+".rotateY";
+			string $cameraCmdRZ1="getAttr "+$Pcamera+".rotateZ";
+
+			float  $flagTX1=eval($cameraCmdTX1);
+			float $flagTY1=eval($cameraCmdTY1);
+			float $flagTZ1=eval($cameraCmdTZ1);
+			float $flagRX1=eval($cameraCmdRX1);
+			float $flagRY1=eval($cameraCmdRY1);
+			float $flagRZ1=eval($cameraCmdRZ1);
+			
+
+
+			if($flagTX == $flagTX1 && $flagTY == $flagTY1 && $flagTZ == $flagTZ1 && $cameraCmdRX ==$cameraCmdRX1 && $cameraCmdRY ==$cameraCmdRY1 && $cameraCmdRZ ==$cameraCmdRZ1 )
+			{
+			
+			
+
+				$flag[$counter]=0;	
+
+			
+			}
+			else
+			{
+				
+				$flag[$counter]=1;
+
+			}
+			
+
+		}
+		
+
+		if($flag[1]==0 && $flag[2]==0 && $flag[3]==0)	
+		{
+		
+			$cam_status[$cam_count]=0;
+
+		}
+		else
+		{
+			$cam_status[$cam_count]=1;
+
+		}
+
+		$cam_count +=1;
+		
+
+	}
+	
+	
+
+}
+
+global proc int[] GetFrameRange()
+{
+	int	$range[3] = { 0, 0, 1 };
+	
+	string $renderer = GetCurrentRenderer();	
+	if( $renderer != "vray" )
+	{
+		$range[0] = `getAttr defaultRenderGlobals.startFrame`;
+		$range[1] = `getAttr defaultRenderGlobals.endFrame`;
+		$range[2] = `getAttr defaultRenderGlobals.byFrameStep`;
+	}
+	else
+	{
+		$range[0] = `getAttr vraySettings.startFrame`;
+		$range[1] = `getAttr vraySettings.endFrame`;
+		$range[2] = `getAttr vraySettings.frameStep`;
+	}
+		
+	return $range;
+}
+
+global proc string GetTileOutputPrefix( string $outputPrefix, int $x, int $y, int $xCount, int $yCount )
+{
+	string $path = dirname( $outputPrefix );
+	if( $path != "" )
+		$path = $path + "/";
+	
+	string $base = basename( $outputPrefix, "" );
+	string $tile = "_tile_" + $x + "x" + $y + "_" + $xCount + "x" + $yCount + "_";
+	return $path + $tile + $base;
+}
+
+global proc string GetOutputPrefix()
+{
+	string $renderer = GetCurrentRenderer();
+	if( $renderer != "vray" )
+	{
+		int $paddingFound = 0;
+	
+		// Get the first output prefix.
+		string $prefixes[] = `renderSettings -fin`;
+	
+		/*// Go through each letter of the prefix and create a new prefix with each letter
+		// separated by colons, ie: f:i:l:e:n:a:m:e:.:e:x:t:
+		string $prefixWithColons = "";
+		for( $i = 1; $i <= size( $prefixes[0] ); $i++ )
+			$prefixWithColons += substring( $prefixes[0], $i, $i ) + ":";
+	
+		// Now split up the new prefix into an array, which removes all the colons and
+		// places one letter in each index. Then count backwards and replace the first
+		// group of numbers with the padding characters.
+		string $prefix[] = stringToStringArray( $prefixWithColons, ":" );
+		for( $i = size( $prefix ); $i > 0; $i-- )
+		{
+			if( match( "[0-9]", $prefix[$i] ) != "" )
+			{
+				$prefix[$i] = "?";
+				$paddingFound = 1;
+			}
+			else if( $paddingFound )
+				break;
+		}
+	
+		// Finally, convert the prefix array back to a string and return it.
+		return stringArrayToString( $prefix, "" );*/
+		string $buffer[];
+		tokenize $prefixes[0] "." $buffer;
+		string $bufferr[];
+		$numTokens = `tokenize $buffer[0] "//" $bufferr`;
+		return $bufferr[1];
+	}
+	else
+	{
+		string $prefix;
+		// Need to special case vray, because they like to do things differently.
+		global string $g_vrayImgExt[];
+		
+		string $ext = "";
+		if( $prefix == "" )
+			$prefix = StripPathAndExt( `file -q -sceneName` );
+		
+		// Seems to be a bug where no matter what, VRay will use 4 digits for padding.
+		// If ever fixed, try using the value from the vray settings.
+		//int $padding = `getAttr vraySettings.fileNamePadding`;
+		int $padding = 4;
+		
+		string $paddingStr = "";
+		for( $i = 0; $i < $padding; $i ++ )
+			$paddingStr = $paddingStr + "?";
+		
+		// When rendering, vray places a period before the padding, even though it
+		// doesn't show up in the render globals filename.
+		print $prefix;
+		return $prefix + "." + $paddingStr + "." + $ext;
+	}
+}
+
+
+global proc string CheckSlashes( string $filename )
+{
+
+	string $result = $filename;
+	string $newResult;
+	$newResult = `substitute "\\\\" $result "/"`;
+	while( $newResult != $result )
+	{
+		$result = $newResult;
+		$newResult = `substitute "\\\\" $result "/"`;
+	}
+	
+	$result = $newResult;
+	$newResult = `substitute "//" $result "/"`;
+	while( $newResult != $result )
+	{
+		$result = $newResult;
+		$newResult = `substitute "//" $result "/"`;
+	}
+	
+	if( startsWith( $newResult, "/" ) )
+		$newResult = "/" + $newResult;
+	
+return $newResult;
+}
+global proc int IsRenderLayersOn()
+{
+	int $layers = false;
+	
+	int $goodRLCounter = 0;
+	string $renderLayers[] = `ls -exactType "renderLayer"`;
+	for( $item in $renderLayers )
+	{
+		if( `gmatch $item "defaultRenderLayer"` == 1 )
+			$goodRLCounter++; // This is THE defaultRenderLayer, so count it.
+		else if( `gmatch $item "*defaultRenderLayer*"` != 1 )
+			$goodRLCounter++; // This is a user render layer, count it.
+	}
+
+	if( $goodRLCounter > 1 )
+		$layers = true;
+
+	return $layers;
+}
+
+global proc string WriteJobFilesAndSubmitt(string $pool, string $renderer, int $showDialog,string $outputpath,string $FrameList,string $JobName,string $Comments,string $ProjectPath,string $CameraName,string $TaskSize,string $layerName)
+{
+	// Get the deadline temp directory.
+	string $tempDir = SafeDeadlineCommand( "-gethomedirectory" ) + "/temp";
+	
+	// Get the output file path and prefix.
+	string $outputFilePath = $outputpath;
+	string $outputFilePrefix = $JobName;
+	string $mentalRayFilename =$outputpath;
+	
+	// Get some initial settings.
+	string $jobName = $JobName;
+	string $frameList = $FrameList;
+	
+	// Append the render layer name to the job name if the submit each render layer check is on.
+	string $currentRenderLayer = "";
+	int $submitEachRenderLayer = false;
+	if( IsRenderLayersOn() )
+	{
+		$submitEachRenderLayer = 1;//will be one when more then 1 renderlayer;    
+		if($submitEachRenderLayer )
+		{
+			$currentRenderLayer = `editRenderLayerGlobals -query -currentRenderLayer`;
+			$jobName += " - " + $currentRenderLayer;
+		
+			// Renderman doesn't output the default render layer to it's own directory
+			//if ( !( $renderer == "renderMan" && $currentRenderLayer == "defaultRenderLayer") )
+			//	$outputFilePath = $outputFilePath + "/" + $currentRenderLayer;
+			
+			// Check if we should override the globals or not.
+				int $range[] = GetFrameRange();
+				$frameList = $range[0] + "-" + $range[1] + "x" + $range[2];
+		}
+	}
+	
+
+	
+	// Create the job info file.
+	string $submitFilename = CheckSlashes( $tempDir + "/maya_deadline_info.job" );
+	$fileId = `fopen $submitFilename "w"`;
+	if( $fileId == 0 )
+		print( "Error in Deadline Submission Script: could not create " + $submitFilename + "\n" );
+	
+ 	fprint $fileId ( "Plugin=MayaBatch\n" );
+
+	fprint $fileId ( "Name=" + $JobName + "\n" );
+	fprint $fileId ( "Comment=" +$Comments + "\n" );
+	fprint $fileId ( "Pool=" + $pool + "\n" );
+	fprint $fileId ( "MachineLimit=" + 0 + "\n" );
+	fprint $fileId ( "Priority=" + 50 + "\n" );
+	fprint $fileId ( "Frames=" + $FrameList + "\n" );
+	fprint $fileId ( "ChunkSize=" +  $TaskSize + "\n" );
+	fprint $fileId ( "OutputDirectory0=" + dirname( $mentalRayFilename ) + "\n" );		   
+	fclose $fileId;
+
+	
+	// Create the plugin info file.
+
+	string $jobFilename = CheckSlashes( $tempDir + "/maya_deadline_job.job" );
+	$fileId = `fopen $jobFilename "w"`;
+	if( $fileId == 0 )
+		print( "Error in Deadline Submission Script: could not create " + $jobFilename + "\n" );
+	
+  		fprint $fileId ( "Renderer=" + $renderer + "\n" );
+		fprint $fileId ( "ProjectPath=" + CheckSlashes( $ProjectPath ) + "\n" );
+		fprint $fileId ( "UsingRenderLayers=" + IsRenderLayersOn() + "\n" );
+		fprint $fileId ( "RenderLayer=" + $currentRenderLayer + "\n" );
+		
+		fprint $fileId ( "MaxProcessors=" + 0 + "\n" );
+		
+		if( $renderer == "mayaSoftware" )
+		{
+			// render globals qualification
+			string $rendQual[] = `listConnections defaultRenderGlobals.qual`;
+			
+			// get antialising quality level and turn it into a string
+			string $strAntialiasing = "highest";
+			int $intAntialiasing = `getAttr ($rendQual[0] + ".edgeAntiAliasing")`;
+			if ( $intAntialiasing == 1 ) $strAntialiasing = "high";
+			if ( $intAntialiasing == 2 ) $strAntialiasing = "medium";
+			if ( $intAntialiasing == 3 ) $strAntialiasing = "low";
+			
+			fprint $fileId ( "AntiAliasing=" + $strAntialiasing + "\n" );
+		}
+		
+		if( $renderer == "mentalRay" )
+			fprint $fileId ( "MentalRayVerbose=Progress Messages\n" );
+	
+	
+	fprint $fileId ( "Version=" + `about -version` + "\n" );
+	
+	
+	int $res[] = GetGlobalsResolution();
+	fprint $fileId ( "ImageWidth=" + $res[0] + "\n" );
+	fprint $fileId ( "ImageHeight=" + $res[1] + "\n" );
+	fprint $fileId ( "AspectRatio=" + `getAttr "defaultResolution.deviceAspectRatio"` + "\n" );
+	
+	fprint $fileId ( "OutputFilePath=" + $outputFilePath + "\n" );
+	if( IsRenderLayersOn() && !$submitEachRenderLayer )
+		fprint $fileId ( "OutputFilePrefix=\n" );
+	else
+	{
+		string $mayaOutputFilePrefix =$layerName; GetMayaOutputPrefix();
+		string $path=$outputpath;
+		string $buffer[];
+		$numTokens = `tokenize $path "/" $buffer`;
+		int $lenth=size($buffer);
+		fprint $fileId ( "OutputFilePrefix=" +$buffer[$lenth-1]+"_"+ $mayaOutputFilePrefix + "\n" );	
+	}
+	
+	fprint $fileId ( "MotionBlur=" + GetMotionBlur() + "\n" );
+	
+       fprint $fileId ( "Camera=" + $CameraName + "\n" );
+
+	string $cameraList[] = `ls -cameras`;
+	int $camNumber = `size $cameraList`;
+	// Now list all the camera options
+	fprint $fileId ("Camera0=\n");
+	for( $n = 1 ; $n <= $camNumber; $n++ )
+		fprint $fileId ( "Camera" + $n + "=" + $cameraList[ $n - 1 ] + "\n" );
+	
+	string $sceneFilePath = CheckSlashes( `file -q -sceneName` );
+	fprint $fileId ( "SceneFile=" + $sceneFilePath + "\n" );//added  to write mayaScene File name
+
+	fclose $fileId;
+	
+	
+	// Submit the job to Deadline
+	string $submissionCommand = "\"" + $submitFilename + "\" \"" + $jobFilename + "\"";
+	$submissionCommand += " \"" + $sceneFilePath + "\"";
+	string $submitResults = SafeDeadlineCommand( $submissionCommand );
+	
+	// Get the job id to return
+	string $jobId = "";
+	string $jobIdRegEx = "[a-z,A-Z,0-9]+_[0-9]+_[a-z,A-Z,0-9]+_[0-9,a-f,A-F]+";
+	$matches = `match $jobIdRegEx $submitResults`;
+	if( size( $matches ) > 0 )
+		$jobId = $matches;
+	
+	// Specify which renderer is being used.
+  	$submitResults = $submitResults + "\n\nUsing renderer: " + $renderer + "\n";
+	
+	// Show results
+	if( $showDialog )
+		confirmDialog -title "Submission Results" -message $submitResults -button "Ok";
+	else
+	///	print( "\n\nSubmission Results For Job " + $jobName + ":\n---------------------------------------------------------------------------\n" + $submitResults + "\n" );
+	
+//	return ($jobId+"_"+$JobName+"_"+$CameraName);
+	return ($jobId);
+
+}
+
+
+
+
+
+
+//*********************************************Job Submission to DeadLine******************************************************//
+
+//***************************************************Add Path to list******************************************************//
+global proc AddPaths()
+{
+     string $userPath =`textFieldButtonGrp -q -tx pathFieldGrp`;
+     string $listPathsList[] = `textScrollList -q -allItems pathList`;
+
+     if ($userPath != ""){
+          textScrollList -e -append $userPath pathList;
+     }
+     
+     //save paths to the text file
+     $pb_FileName = ( `internalVar -userAppDir` + "BakeAO_Paths.txt" );
+     $fileId=`fopen $pb_FileName "w"`;
+
+     for ($i=0; $i<(size($listPathsList)); $i++){
+          fwrite $fileId $listPathsList[$i];
+
+     }
+     fclose $fileId;
+}
+//***************************************************Add Path to list******************************************************//
+
+//*****************************  To View the Display Camera Settings**********************************************************//
+
+
+global proc add_cam_name()
+{
+     global string $ProjectPathGrp;
+     global string $ImageOutputPathGrp;
+     int $indd[] = eval("textScrollList -q -sii pathList2");
+
+     string $padd=padding($indd[0]);
+     string $camname="Shot"+"_"+$padd;
+
+     string $ProjectDir = CheckSlashes(`textFieldButtonGrp -q -text $ImageOutputPathGrp`);
+     string $savedOutputFilePath=$ProjectDir+"/"+ $camname; 
+     textFieldButtonGrp -e -text $savedOutputFilePath $ImageOutputPathGrp;
+     OutSettingss();
+
+
+}
+
+global proc string SceneName()
+{
+string $buffer[];
+string $bufferr[];
+string $SceneName=`file -q -sn`;
+$numTokens = `tokenize $SceneName"/" $buffer`;
+int $length=size($buffer);
+string $result=$buffer[$length-1];
+$numTokenss = `tokenize $result "." $bufferr`;
+$length=size($bufferr);
+string $resultt=$bufferr[0];
+return $resultt;
+}
+
+
+global proc Display_Camera_Settings_pathlist2()
+{
+     global string $ProjectPathGrp;
+     global string $ImageOutputPathGrp;
+     global string $JobNames[];
+     global string $Comments[];
+     global string $FrameLists[];
+     global string $TaskSizes[];
+     global string $pool[];
+     string $username="";
+     global string $ProDir[];
+     global string $OutDir[];
+     string $filenam;
+     string $filename= ProjectName();//GetOutputPrefix();
+     int $path[] = eval("textScrollList -q -sii pathList2");
+     int $ind=$path[0];
+     string $savedOutputFilePath ;
+     string $projectPath = GetImageDirectory();
+     string $cmd_IN	;
+     string $cmd_OUT ;
+     string $path2[] = eval("textScrollList -q -selectItem pathList2");
+     string $regularExpr = "cameraShape";
+
+
+     if($pool[$ind]=="")		
+	{
+		optionMenuGrp -e -sl 3  menupool;
+		string $pl=`optionMenuGrp -q -v menupool`;
+		$pool[$ind]=$pl;
+	}
+	else
+	{
+		
+		string $sel=$pool[$ind];
+		optionMenuGrp -e -v $sel  menupool;
+
+		//optionMenuGrp -e -sl $sel;
+		//optionMenuGrp -label  "POOL" -cw1 2 -cc SetPool menupool
+		//optionMenuGrp -q -v menupool
+	}
+     if($JobNames[$ind]=="")
+	{
+	     string $padd=padding($ind);
+	     $filenam = $filename+"_"+ "Shot"+"_"+$padd;
+
+            string $filenme=substituteAllString($filenam, ":", "_");
+        	string $filenme=substituteAllString($filenam, ":", "_");
+		$JobNames[$ind]=$filenme; 
+ 		textFieldGrp -e -tx $JobNames[$ind] jobNameGrp;
+       }
+	else
+	{
+		string $result = substituteAllString($JobNames[$ind], "_maya/", "_");
+
+		textFieldGrp -e -tx $result jobNameGrp;
+	}
+
+     if($FrameLists[$ind]=="")
+	{
+	     $cmd_IN="getAttr"+" "+$path2[0]+"."+"in";	
+	     $cmd_OUT="getAttr"+" "+$path2[0]+"."+"out";	
+	     string $in=eval($cmd_IN);
+	     string $out=eval($cmd_OUT);	
+	     string $framelist=$in+"-"+$out;
+	     $FrameLists[$ind]=$framelist;	
+	     textFieldGrp -e -tx $FrameLists[$ind] FrameListGrp;
+
+	
+	}
+	else
+	{
+	     textFieldGrp -e -tx $FrameLists[$ind] FrameListGrp;
+
+	}
+              
+	if($Comments[$ind]=="")
+	{
+	     $username="Submitted By "+Username();
+	     $Comments[$ind]=$username;
+            textFieldGrp -e -tx  $Comments[$ind] CommentsGrp;
+	
+	
+
+	}
+	else
+	{
+	     textFieldGrp -e -tx  $Comments[$ind] CommentsGrp;
+
+	}
+
+	if($TaskSizes[$ind] == "25" || $TaskSizes[$ind]=="")
+	{
+  	       textFieldGrp -e -text "25" TaskSize;
+		$taskSizes[$ind]=`textFieldGrp -q -text TaskSize`;
+		//$taskSizes[$ind]=25;
+
+	}
+	else
+	{
+	     string $tasksize=$TaskSizes[$ind];
+	     textFieldGrp -e -text $tasksize TaskSize;	
+            
+
+	}
+
+	if($OutDir[$ind]=="")
+	{
+	     
+		$OutDir[$ind]	= GetImageDirectory()+"Renders";
+ 	        textFieldGrp -e -text $OutDir[$ind] $ImageOutputPathGrp;	
+ 
+	}
+	else
+	{
+	     string $outdir=$OutDir[$ind];
+	     textFieldGrp -e -text $outdir $ImageOutputPathGrp;	
+            
+
+	}
+
+	if($ProDir[$ind]=="")
+	{
+	     
+		$ProDir[$ind]	= GetImageDirectory();
+		textFieldGrp -e -text $ProDir[$ind] $ProjectPathGrp;	
+
+		//$taskSizes[$ind]=`textFieldGrp -q -text TaskSize`;
+
+	}
+	else
+	{
+	     string $prodir=$ProDir[$ind];
+	     textFieldGrp -e -text $prodir $ProjectPathGrp;	
+            
+
+	}
+
+
+
+
+}
+
+
+//*****************************  To View the Display Camera Settings**********************************************************//
+
+//*****************************  To View the List of Cameras**********************************************************//
+
+global proc arraypopulate()
+{
+
+   global string $itemarrays[];
+   string $pathlistarray[] = `textScrollList -q -selectItem pathList`;
+   string $pathitem;
+   string $arrayitem;
+   int $length=size($itemarrays);	
+   for ($pathitem in $pathlistarray)
+	{
+
+		for($arrayitem in $itemarrays)
+		{
+			if($pathitem != $arrayitem )
+			{
+
+				$itemarrays[$length+1]=$pathitem;
+			}
+		}
+	}
+
+   
+// print $itemarrays;
+
+
+}
+global proc string Cameras()
+{
+string $cam;
+string $lstcam;
+//string $Cameras[]= eval("listCameras -p");
+string $Cameras[]= eval("ls -cameras");
+for($cam in $Cameras)
+{
+$lstcam= "-append  " + "\"" + $cam+ "\"  " + $lstcam;
+
+}
+return  "textScrollList -numberOfRows 8 -allowMultiSelection true -height 210  -selectCommand arraypopulate -dcc Move1  "+$lstcam +"pathList"+";";
+ 
+
+}//*****************************  To View the List of Cameras**********************************************************//
+
+
+
+//*******************************	<< Move******************************************************************************//
+
+global proc string Move2()
+{
+   //gets the selected item on the ScrollList
+   global int $count;
+   $count=0;
+   string $cam,$lstcam;
+   string $selpath[] = `textScrollList -q -selectItem pathList2`;
+   for($cam in $selpath)
+	{
+		$lstcam= "-append  " + "\"" + $cam+ "\"  " + $lstcam;
+		textScrollList -e -append $cam pathList;
+		textScrollList -e -removeItem  $cam pathList2;
+
+	}	
+   setArrays();
+   return "textScrollList -numberOfRows 8 -allowMultiSelection true -height 210 -selectCommand Display_Camera_Settings "+$lstcam+"pathList"+";";
+
+   
+}
+
+//*******************************	<< Move******************************************************************************//
+
+
+
+
+
+
+
+
+//*******************************	Move>>******************************************************************************//
+
+global proc string Move1()
+{
+   //gets the selected item on the ScrollList
+   global string $ProDir[];
+   global string $OutDir[];	
+   string $cam,$lstcam;
+   global int $count;
+   $count=1;
+   int $i=0;
+
+
+   string $selpath[] = `textScrollList -q -selectItem pathList`;
+
+	for($cam in $selpath)
+	{	
+		
+		$lstcam= "-append  " + "\"" + $cam+ "\"  " + $lstcam;
+		textScrollList -e -append $cam pathList2;
+		textScrollList -e -removeItem  $cam pathList;
+		OutSettings();
+		ProSettings();
+ 
+
+	}
+	
+   return "textScrollList -numberOfRows 8 -allowMultiSelection true -height 210 -selectCommand Display_Camera_Settings "+$lstcam+"pathList"+";";
+
+   
+}
+
+//*******************************	Move>>******************************************************************************//
+
+
+
+
+
+global proc string SafeDeadlineCommand( string $command )
+{
+
+	string $result = system("deadlinecommand " + $command );
+	$result = substituteAllString( $result, "\r", "" );
+	
+	string $resultArray[];
+	$resultArray = stringToStringArray( $result, "\n" );
+	if( size($resultArray) > 2 && startsWith( $resultArray[2], "UNC paths are not supported." ) )
+	{
+		int $tempResultArraySize = size($resultArray) - 3;
+		string $tempResultArray[];
+		for( $i = 0; $i < $tempResultArraySize; $i++ )
+			$tempResultArray[$i] = $resultArray[$i+3];
+		$result = stringArrayToString( $tempResultArray, "\n" );
+	}
+	
+	if( endsWith( $result, "\n" ) )
+		$result = substring( $result, 1, size( $result ) - 1 );
+	
+	return $result;
+}
+global proc SetProjectDir()
+{
+	global string $ProjectPathGrp;
+	string $newdir = SafeDeadlineCommand( "-getdirectory \"" + `textFieldButtonGrp -q -text $ProjectPathGrp` + "\"" );
+	if( $newdir != "" )
+		textFieldButtonGrp -e -text $newdir $ProjectPathGrp;
+	
+}
+
+
+
+global proc SetImageDir()
+{
+	global string $ImageOutputPathGrp;
+	string $newdir = SafeDeadlineCommand( "-getdirectory \"" + `textFieldButtonGrp -q -text $ImageOutputPathGrp` + "\"" );
+	if( $newdir != "" )
+		textFieldButtonGrp -e -text $newdir $ImageOutputPathGrp;
+	
+}
+
+//setAttr -type "string" banka:bankay_skinned_01_hair:bankay:All_Bankay_Shaders_file1.fileTextureName "P:/channelx/qawwals/assets/characters/bankay/textures/yellow.tga";
+
+global proc SetKurta()
+{
+	 
+	string $oldfilename="getAttr banka:bankay_skinned_01_hair:bankay:All_Bankay_Shaders_file1.fileTextureName";
+	 string $value=eval($oldfilename);
+	 string $filename=`fileDialog -directoryMask "P:/channelx/qawwals/assets/characters/bankay/textures/mentalray_maps/*.map"`;
+	 string $command;
+	 global string $kurtaname;
+	 if($filename !="")
+		{
+				 $command="setAttr -type "+"\""+"string"+"\" "+ "banka:bankay_skinned_01_hair:bankay:All_Bankay_Shaders_file1.fileTextureName "+"\""+$filename+"\"";
+				print ($command+"\n");
+
+		}
+	else
+		{
+					//setAttr -type "string" banka:bankay_skinned_01_hair:bankay:All_Bankay_Shaders_file1.fileTextureName "P:/channelx/qawwals/assets/characters/bankay/textures/kurta_diffuse_Red_color.tga";
+
+				$command="setAttr -type "+"\""+"string"+"\" "+ "banka:bankay_skinned_01_hair:bankay:All_Bankay_Shaders_file1.fileTextureName "+"\""+$value+"\"";
+
+
+		}
+	string $buffer[];
+	$numTokens = `tokenize $command "//" $buffer`;
+	int $len=size($buffer);
+	$kurtaname=$buffer[$len-1];
+
+	$numTokens1 = `tokenize $kurtaname "." $buffer`;
+	int $len=size($buffer);
+	$kurtaname=$buffer[$len-2];
+	int $valuee=`checkBox -q -v Nukrender`;
+	//string $filepath="R:/Nuke_Scripts/Banka_Scripts/"+$kurtaname+"_bankay_shot_comp.nk";
+	string $filepath="R:/Nuke_Scripts/Banka_Scripts/banka.nk";
+	int $filecheck=`file -q -ex $filepath`;
+	if($valuee==1 && $filecheck==1)
+	{
+	 
+		eval($command);
+
+	}
+	else
+	{
+		confirmDialog -title "Nuke Error !!!" -message "Nuke Reference File is not Find..." -button "Return..";
+		error("Nuke Reference File is not Find...");
+		return;
+
+		
+	
+	}
+	
+	
+
+
+}
+global proc SetPool()
+{	
+	global string $pool[]; 	
+	 int $path[] = eval("textScrollList -q -sii pathList2");
+	 int $ind=$path[0];
+        $pool[$ind]=`optionMenuGrp -q -v menupool`;
+}
+global proc string Username()
+{
+
+	string $result = system ("echo %USERNAME%"); 
+	return $result;
+
+
+}
+
+global proc Ice_Render_GUI()
+{
+	
+	setArrays();
+	if(`window  -ex icedisplay`==1)
+	{
+		deleteUI -window icedisplay;
+		Ice_Render();
+	}
+	else
+	{
+		Ice_Render();
+	}
+}
+
+global proc Ice_Render()
+{
+int $labelWidth = 110;
+global int $cam_status[];
+global int $cam_count=0;
+global string $ProjectPathGrp="";
+global string $ImageOutputPathGrp="";
+global string $jobName="";
+global string $jobnames="";
+global string $comments="";
+global string $framelist="";
+global string $tasksize="";
+global int $count=1;
+global int $count1=1;
+global string $ProDir[];
+global string $OutDir[];
+global string $JobNames[];
+global string $Comments[];
+global string $FrameLists[];
+global string $TaskSizes[];
+global string $pool[];
+global int $jobint=1;
+global int $Commentint=1;
+global int $FrameListint=1;
+global int $TaskSizeint=1;
+global string $projectPath;	
+string $savedOutputFilePath ="";
+
+setArrays();
+
+window -title "ICE Animations Render Settings" -width 300 icedisplay; 
+paneLayout -configuration "horizontal2";
+{
+	
+	paneLayout -configuration "vertical2" ;
+	paneLayout;
+			columnLayout -adjustableColumn true;
+				    text -label "Total Cameras In Scene" -align "center";
+				eval(Cameras());
+
+			columnLayout -adjustableColumn true;	    
+				    button -label "Move >>"  -align "center" -c Move1;
+	
+	setParent..;
+ 	setParent..;		
+	setParent..;	
+	paneLayout;
+			columnLayout -adjustableColumn true;
+				    text -label "Render Cameras Of Scene" -align "center";
+
+
+			
+			textScrollList -numberOfRows 8 -allowMultiSelection true -height 210 -selectCommand Display_Camera_Settings_pathlist2 -dcc add_cam_name pathList2;
+ 
+			columnLayout -adjustableColumn true;	    
+				    button -label "<< Move "  -align "center" -c Move2;
+	
+	setParent..;
+	setParent..;	
+	setParent..;
+	setParent..;
+	
+	frameLayout -label " Job Description" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable false;
+				columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4;
+    	   				textFieldGrp -label "Job Name" -cl2 "left" "left" -cw2 $labelWidth 320 -text "" -changeCommand JobNames jobNameGrp ;
+					textFieldGrp -label "Comments" -cl2 "left" "left" -cw2 $labelWidth 320 -text " " -changeCommand comments CommentsGrp;
+					textFieldGrp -label "Frame List" -cl2 "left" "left" -cw2 $labelWidth 320 -text " " -changeCommand framelist FrameListGrp;
+					intSliderGrp -label "Task Size" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 1 -maxValue 1000 -v 25 -changeCommand tasksize TaskSize;
+					$ImageOutputPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Output Path" -buttonLabel "..." -fileName $savedOutputFilePath -changeCommand OutSettingss -annotation "The path to which the output files will be sent. Must be network accessible." frw_outputFilePath`;
+					 	textFieldButtonGrp -e -bc SetImageDir  $ImageOutputPathGrp;
+					$ProjectPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Project Path"  -buttonLabel "..." -fileName $projectPath -changeCommand ProSettingss -annotation "Use this Maya project path to load the Maya scene" frw_projectPath`;
+						textFieldButtonGrp -e -bc SetProjectDir $ProjectPathGrp;
+							
+			
+						frameLayout -label "Job Status" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable false;
+							rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 								text -label "Job Progress: " -align "center";
+								progressBar -min 0 -maxValue 100 -width 300 Overallprogress;		
+							setParent..;
+						setParent..;
+
+
+	frameLayout -label "Job Submission" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable false;
+	columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4 buttonColumnLayout;
+		rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+			string $B3 = `button -label "Render Globals..." -width 110 -height 26 -c unifiedRenderGlobalsWindow -annotation "Opens the Maya Render Globals Dialog" frw_GlobalsButton`;
+			button -label "Edit Project..." -width 110 -height 26 -c EditProject -annotation "Opens the Maya Edit Project Dialog";
+			button -label "Submit Job" -width 110 -height 26 -align "right"-c sendrender;
+			button -label "Refresh" -width 110 -height 26 -align "center" -c Ice_Render_GUI;
+		setParent ..;
+	setParent ..;
+	setParent ..;
+
+					frameLayout -label "Advance Settings For Qawali" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable true -cl true;
+						rowLayout -numberOfColumns 5 -cw5 140 140 140 140 140;
+								checkBox -label "Submit Nuke Render"   -align "left" -annotation "Check to Submit Nuke Render" -v 1  Nukrender;
+								checkBox -label "Add Dependencies"   -align "left" -annotation "Check to add dependencies in Render" -v 1   depend; 
+								checkBox -label "Check Cache"   -align "left" -annotation "Check to Submit Nuke Render" -v 1 CheckCache;
+								//button -label "Set Kurta" -width 110 -height 26 -align "center" -c SetKurta ;
+								 toolButton -tool       selectSuperContext      -toolImage1 selectSuperContext "P:/channelx/qawwals/assets/props/Icons/Kurta50.bmp" -dcc SetKurta;
+						columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4 buttonColumnLayout;
+								
+								
+								optionMenuGrp -label  "POOL" -cw1 2 -cc SetPool menupool ;
+									string $deadlinePools[];
+									string $poolsQuery =system("deadlinecommand pools");
+									tokenize $poolsQuery "\n" $deadlinePools;
+										for($item in $deadlinePools)
+											{
+												menuItem -label $item;
+												
+											}
+								optionMenuGrp -e -sl 3  menupool ;
+	
+							setParent..;
+						setParent..;
+					setParent..;
+
+	setParent ..;
+
+}
+
+showWindow icedisplay;
+}
+
+Ice_Render_GUI();

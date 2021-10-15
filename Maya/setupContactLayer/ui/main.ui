@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>859</width>
+    <height>409</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Setup Contact Layer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QListWidget" name="charsPropsBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>261</width>
+      <height>291</height>
+     </rect>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::ExtendedSelection</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>171</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Characters and Props</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>330</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add selection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="removeButton">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>330</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Remove selection</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="occBox">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>30</y>
+      <width>261</width>
+      <height>291</height>
+     </rect>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::ExtendedSelection</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addButton2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>330</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add selection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="removeButton2">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>330</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Remove selection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="removeButton3">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>330</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Remove selection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addButton3">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>330</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add selection</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="matteBox">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>30</y>
+      <width>261</width>
+      <height>291</height>
+     </rect>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::ExtendedSelection</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>10</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Occluded objects</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>10</y>
+      <width>161</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Matte Parameters</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setupButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>370</y>
+      <width>821</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Setup</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

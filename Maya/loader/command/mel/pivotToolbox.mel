@@ -1,0 +1,931 @@
+/* pivotToolbox.mel V1.32 - Maya2.x, 3.x, 4.x
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author	: Dirk Bialluch
+
+E-mail  : DirkB@Mayaring.com
+Homepage: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 20.03.2002
+
+DESCRIPTION
+	This is a collection of pivot tools. For detailed information refer
+	to the online help. Double click on any Pivot Toolbox tab to call
+	the ´User Interface´ help.
+
+FUNCTION SUMMARY
+ Set Pivot
+ Center Pivot on Object
+ Fit Pivot
+ Average Pivots
+ Center Pivot on Surface Points
+ Center Pivot on Polygon Vertices
+ Center Pivot on Curve Points
+ Unify Pivots
+ Set Local Axis
+ Fit Local Axis
+ Fit Object
+ Center Object on Pivot
+ Display Pivot
+ Print pivot coordinates
+ Create Geometry
+ Group at Pivots
+
+HISTORY
+	V1.1	ENHANCED
+		-New compact UI with icons, scrollable tab layout
+		-Script divided into several smaller parts
+		-Online help integrated
+		-Selection watcher to adjust UI settings depending on selection changes
+		-Selection restricted to transform nodes
+		-Set Pivot
+			Choose Rotate/Scale Pivot
+		-Center Pivot on Object
+			Bounding Box alignment
+			Choose Rotate/Scale Pivot
+		-Fit Pivot
+			Choose Rotate/Scale Pivot
+		-Center Pivot on Curve Points
+			Choose point selection method
+			Limit range to current selection
+			Set individual or common
+		-Fit Object
+			Choose Source and Destination Pivot
+			Align Rotation
+		-Center Object on Pivot
+			Choose Rotate/Scale Pivot
+			Other Pivot sticky on/off
+			Bounding Box alignment
+		-Display Pivot
+			Display Local Axis
+
+		NEW
+		-Average pivots
+		-Center Pivot on Surface Points 
+		-Unify Pivots
+		-Set Local Axis
+		-Fit Local Axis
+		-Print Pivot Coordinates
+		-Create geometry
+
+	V1.2	ENHANCED
+		-Store and recall UI settings
+		-Collapsable frame layouts
+
+		NEW
+		-Group at Pivots
+
+	V1.21	ENHANCED
+		-Tab icon removed due to a change in Maya2.0 that causes problems under NT
+
+	V1.22	FIXED
+		-Tab icon was not removed from help window causing an execution error. This has been fixed.
+
+	V1.3	FIXED
+		-constrain axes bug in "Center Pivot on Surface Points" function removed
+
+		ENHANCED
+		-shelf buttons replaced by symbol buttons
+
+		NEW
+		-Center Pivot on Polygon Vertices
+	
+	V1.31	NEW
+			-script now supports joints and ik handles
+			-hierarchy options for "Fit Local Axis" and "Set Pivot"
+		CHANGED
+			-main and subscripts renamed
+	V1.32	FIXED
+			"Fit Local Axis" will no longer change the rotation order to zyx
+*/
+
+//
+// store UI settings
+//
+
+global proc ptb_storeUI ()
+{
+// frame layout collapse state
+	optionVar -intValue ptb1_frame `frameLayout -q -cl ptb1_frame`;
+	optionVar -intValue ptb2_frame `frameLayout -q -cl ptb2_frame`;
+	optionVar -intValue ptb3_frame `frameLayout -q -cl ptb3_frame`;
+	optionVar -intValue ptb4_frame `frameLayout -q -cl ptb4_frame`;
+	optionVar -intValue ptb5_frame `frameLayout -q -cl ptb5_frame`;
+	optionVar -intValue ptb6_frame `frameLayout -q -cl ptb6_frame`;
+	optionVar -intValue ptb7_frame `frameLayout -q -cl ptb7_frame`;
+	optionVar -intValue ptb8_frame `frameLayout -q -cl ptb8_frame`;
+	optionVar -intValue ptb9_frame `frameLayout -q -cl ptb9_frame`;
+	optionVar -intValue ptb10_frame `frameLayout -q -cl ptb10_frame`;
+	optionVar -intValue ptb11_frame `frameLayout -q -cl ptb11_frame`;
+	optionVar -intValue ptb12_frame `frameLayout -q -cl ptb12_frame`;
+	optionVar -intValue ptb13_frame `frameLayout -q -cl ptb13_frame`;
+	optionVar -intValue ptb14_frame `frameLayout -q -cl ptb14_frame`;
+	optionVar -intValue ptb15_frame `frameLayout -q -cl ptb15_frame`;
+	optionVar -intValue ptb16_frame `frameLayout -q -cl ptb16_frame`;
+
+// set pivot
+	optionVar -intValue ptb1_xbox `checkBox -q -value ptb1_xbox`;
+	optionVar -intValue ptb1_ybox `checkBox -q -value ptb1_ybox`;
+	optionVar -intValue ptb1_zbox `checkBox -q -value ptb1_zbox`;
+
+	optionVar -floatValue ptb1_xvalue `floatField -q -value ptb1_xvalue`;
+	optionVar -floatValue ptb1_yvalue `floatField -q -value ptb1_yvalue`;
+	optionVar -floatValue ptb1_zvalue `floatField -q -value ptb1_zvalue`;
+
+	optionVar -intValue ptb1_rpBox `checkBox -q -value ptb1_rpBox`;
+	optionVar -intValue ptb1_spBox `checkBox -q -value ptb1_spBox`;
+
+	optionVar -intValue ptb1_relMode `radioButtonGrp -q -select ptb1_relMode`;
+
+	optionVar -intValue ptb1_hierarchy `checkBox -q -value ptb1_hierarchy`;
+
+// center pivot on object
+	optionVar -intValue ptb2_xbox `checkBox -q -value ptb2_xbox`;
+	optionVar -intValue ptb2_ybox `checkBox -q -value ptb2_ybox`;
+	optionVar -intValue ptb2_zbox `checkBox -q -value ptb2_zbox`;
+
+	optionVar -intValue ptb2_rpBox `checkBox -q -value ptb2_rpBox`;
+	optionVar -intValue ptb2_spBox `checkBox -q -value ptb2_spBox`;
+
+	optionVar -intValue ptb2_bb `optionMenu -q -select ptb2_bb`;
+
+	optionVar -intValue ptb2_mode `radioButtonGrp -q -select ptb2_mode`;
+
+// fit pivot
+	optionVar -intValue ptb3_xbox `checkBox -q -value ptb3_xbox`;
+	optionVar -intValue ptb3_ybox `checkBox -q -value ptb3_ybox`;
+	optionVar -intValue ptb3_zbox `checkBox -q -value ptb3_zbox`;
+
+	optionVar -intValue ptb3_rpBox `checkBox -q -value ptb3_rpBox`;
+	optionVar -intValue ptb3_spBox `checkBox -q -value ptb3_spBox`;
+
+// average pivots
+	optionVar -intValue ptb7_xbox `checkBox -q -value ptb7_xbox`;
+	optionVar -intValue ptb7_ybox `checkBox -q -value ptb7_ybox`;
+	optionVar -intValue ptb7_zbox `checkBox -q -value ptb7_zbox`;
+
+	optionVar -intValue ptb7_rpBox `checkBox -q -value ptb7_rpBox`;
+	optionVar -intValue ptb7_spBox `checkBox -q -value ptb7_spBox`;
+
+	optionVar -intValue ptb7_centerMode `radioButtonGrp -q -select ptb7_centerMode`;
+
+// center pivot on surface points
+	optionVar -intValue ptb8_xbox `checkBox -q -value ptb8_xbox`;
+	optionVar -intValue ptb8_ybox `checkBox -q -value ptb8_ybox`;
+	optionVar -intValue ptb8_zbox `checkBox -q -value ptb8_zbox`;
+
+	optionVar -intValue ptb8_rpBox `checkBox -q -value ptb8_rpBox`;
+	optionVar -intValue ptb8_spBox `checkBox -q -value ptb8_spBox`;
+
+	optionVar -intValue ptb8_selMode `radioButtonGrp -q -select ptb8_selMode`;
+
+	optionVar -intValue ptb8_baseMode `radioButtonGrp -q -select ptb8_baseMode`;
+
+	optionVar -intValue ptb8_pointNumU `intSliderGrp -q -value ptb8_pointNumU`;
+	optionVar -intValue ptb8_pointNumV `intSliderGrp -q -value ptb8_pointNumV`;
+
+// center pivot on poly vertices
+	optionVar -intValue ptb16_xbox `checkBox -q -value ptb16_xbox`;
+	optionVar -intValue ptb16_ybox `checkBox -q -value ptb16_ybox`;
+	optionVar -intValue ptb16_zbox `checkBox -q -value ptb16_zbox`;
+
+	optionVar -intValue ptb16_rpBox `checkBox -q -value ptb16_rpBox`;
+	optionVar -intValue ptb16_spBox `checkBox -q -value ptb16_spBox`;
+
+	optionVar -intValue ptb16_selMode `radioButtonGrp -q -select ptb16_selMode`;
+
+	optionVar -intValue ptb16_baseMode `radioButtonGrp -q -select ptb16_baseMode`;
+
+	optionVar -intValue ptb16_vertexNum `intSliderGrp -q -value ptb16_vertexNum`;
+
+// center pivot on curve points
+	optionVar -intValue ptb4_xbox `checkBox -q -value ptb4_xbox`;
+	optionVar -intValue ptb4_ybox `checkBox -q -value ptb4_ybox`;
+	optionVar -intValue ptb4_zbox `checkBox -q -value ptb4_zbox`;
+
+	optionVar -intValue ptb4_rpBox `checkBox -q -value ptb4_rpBox`;
+	optionVar -intValue ptb4_spBox `checkBox -q -value ptb4_spBox`;
+
+	optionVar -intValue ptb4_selMode `radioButtonGrp -q -select ptb4_selMode`;
+
+	optionVar -intValue ptb4_baseMode `radioButtonGrp -q -select ptb4_baseMode`;
+
+	optionVar -intValue ptb4_pointNum `intSliderGrp -q -value ptb4_pointNum`;
+
+	optionVar -intValue ptb4_pointType `radioButtonGrp -q -select ptb4_pointType`;
+
+// unify pivots
+	optionVar -intValue ptb6_xbox `checkBox -q -value ptb6_xbox`;
+	optionVar -intValue ptb6_ybox `checkBox -q -value ptb6_ybox`;
+	optionVar -intValue ptb6_zbox `checkBox -q -value ptb6_zbox`;
+
+	optionVar -intValue ptb6_mode `optionMenu -q -select ptb6_mode`;
+
+// fit object
+	optionVar -intValue ptb5_sourcePiv `radioButtonGrp -q -select ptb5_sourcePiv`;
+	optionVar -intValue ptb5_destPiv `radioButtonGrp -q -select ptb5_destPiv`;
+
+	optionVar -intValue ptb5_rotXBox `checkBox -q -value ptb5_rotXBox`;
+	optionVar -intValue ptb5_rotYBox `checkBox -q -value ptb5_rotYBox`;
+	optionVar -intValue ptb5_rotZBox `checkBox -q -value ptb5_rotZBox`;
+
+// center object on pivot
+	optionVar -intValue ptb12_xbox `checkBox -q -value ptb12_xbox`;
+	optionVar -intValue ptb12_ybox `checkBox -q -value ptb12_ybox`;
+	optionVar -intValue ptb12_zbox `checkBox -q -value ptb12_zbox`;
+
+	optionVar -intValue ptb12_mode `radioButtonGrp -q -select ptb12_mode`;
+
+	optionVar -intValue ptb12_sticky `checkBox -q -value ptb12_sticky`;
+
+	optionVar -intValue ptb12_bb `optionMenu -q -select ptb12_bb`;
+
+// set local axis
+	optionVar -intValue ptb11_xbox `checkBox -q -value ptb11_xbox`;
+	optionVar -intValue ptb11_ybox `checkBox -q -value ptb11_ybox`;
+	optionVar -intValue ptb11_zbox `checkBox -q -value ptb11_zbox`;
+
+	optionVar -floatValue ptb11_xvalue `floatField -q -value ptb11_xvalue`;
+	optionVar -floatValue ptb11_yvalue `floatField -q -value ptb11_yvalue`;
+	optionVar -floatValue ptb11_zvalue `floatField -q -value ptb11_zvalue`;
+
+	optionVar -intValue ptb11_relMode `radioButtonGrp -q -select ptb11_relMode`;
+
+// fit local axis
+	optionVar -intValue ptb10_xbox `checkBox -q -value ptb10_xbox`;
+	optionVar -intValue ptb10_ybox `checkBox -q -value ptb10_ybox`;
+	optionVar -intValue ptb10_zbox `checkBox -q -value ptb10_zbox`;
+	optionVar -intValue ptb10_hierarchy `checkBox -q -value ptb10_hierarchy`;
+
+// display pivot
+	optionVar -intValue ptb9_mode `radioButtonGrp -q -select ptb9_mode`;
+
+	optionVar -intValue ptb9_rbox `checkBox -q -value ptb9_rbox`;
+	optionVar -intValue ptb9_sbox `checkBox -q -value ptb9_sbox`;
+	optionVar -intValue ptb9_abox `checkBox -q -value ptb9_abox`;
+
+// print pivot
+	optionVar -intValue ptb13_mode `optionMenu -q -select ptb13_mode`;
+
+	optionVar -intValue ptb13_coordMode `radioButtonGrp -q -select ptb13_coordMode`;
+
+// create geometry
+	optionVar -intValue ptb14_sourcePiv `radioButtonGrp -q -select ptb14_sourcePiv`;
+	optionVar -intValue ptb14_destPiv `radioButtonGrp -q -select ptb14_destPiv`;
+
+	optionVar -intValue ptb14_geoMode `radioButtonGrp -q -select ptb14_geoMode`;
+
+	optionVar -intValue ptb14_groupMode `radioButtonGrp -q -select ptb14_groupMode`;
+
+	optionVar -intValue ptb14_replaceBox `checkBox -q -value ptb14_replaceBox`;
+
+	optionVar -intValue ptb14_rotXBox `checkBox -q -value ptb14_rotXBox`;
+	optionVar -intValue ptb14_rotYBox `checkBox -q -value ptb14_rotYBox`;
+	optionVar -intValue ptb14_rotZBox `checkBox -q -value ptb14_rotZBox`;
+
+// group at pivots
+	optionVar -intValue ptb15_xbox `checkBox -q -value ptb15_xbox`;
+	optionVar -intValue ptb15_ybox `checkBox -q -value ptb15_ybox`;
+	optionVar -intValue ptb15_zbox `checkBox -q -value ptb15_zbox`;
+
+	optionVar -intValue ptb15_rpBox `checkBox -q -value ptb15_rpBox`;
+	optionVar -intValue ptb15_spBox `checkBox -q -value ptb15_spBox`;
+
+	optionVar -intValue ptb15_centerMode `radioButtonGrp -q -select ptb15_centerMode`;
+
+// UI last selected tab
+	optionVar -intValue ptb_tab `tabLayout -q -sti ptb_tab`;
+}
+
+//
+// recall UI settings
+//
+
+proc ptb_recallUI ()
+{
+// frame layout collapse state
+	if (`optionVar -exists ptb1_frame`)
+		frameLayout -e -cl `optionVar -q ptb1_frame` ptb1_frame;
+	if (`optionVar -exists ptb2_frame`)
+		frameLayout -e -cl `optionVar -q ptb2_frame` ptb2_frame;
+	if (`optionVar -exists ptb3_frame`)
+		frameLayout -e -cl `optionVar -q ptb3_frame` ptb3_frame;
+	if (`optionVar -exists ptb4_frame`)
+		frameLayout -e -cl `optionVar -q ptb4_frame` ptb4_frame;
+	if (`optionVar -exists ptb5_frame`)
+		frameLayout -e -cl `optionVar -q ptb5_frame` ptb5_frame;
+	if (`optionVar -exists ptb6_frame`)
+		frameLayout -e -cl `optionVar -q ptb6_frame` ptb6_frame;
+	if (`optionVar -exists ptb7_frame`)
+		frameLayout -e -cl `optionVar -q ptb7_frame` ptb7_frame;
+	if (`optionVar -exists ptb8_frame`)
+		frameLayout -e -cl `optionVar -q ptb8_frame` ptb8_frame;
+	if (`optionVar -exists ptb9_frame`)
+		frameLayout -e -cl `optionVar -q ptb9_frame` ptb9_frame;
+	if (`optionVar -exists ptb10_frame`)
+		frameLayout -e -cl `optionVar -q ptb10_frame` ptb10_frame;
+	if (`optionVar -exists ptb11_frame`)
+		frameLayout -e -cl `optionVar -q ptb11_frame` ptb11_frame;
+	if (`optionVar -exists ptb12_frame`)
+		frameLayout -e -cl `optionVar -q ptb12_frame` ptb12_frame;
+	if (`optionVar -exists ptb13_frame`)
+		frameLayout -e -cl `optionVar -q ptb13_frame` ptb13_frame;
+	if (`optionVar -exists ptb14_frame`)
+		frameLayout -e -cl `optionVar -q ptb14_frame` ptb14_frame;
+	if (`optionVar -exists ptb15_frame`)
+		frameLayout -e -cl `optionVar -q ptb15_frame` ptb15_frame;
+	if (`optionVar -exists ptb16_frame`)
+		frameLayout -e -cl `optionVar -q ptb16_frame` ptb16_frame;
+
+// set pivot
+	if (`optionVar -exists ptb1_xbox`)
+		checkBox -e -value `optionVar -q ptb1_xbox` ptb1_xbox;
+	if (`optionVar -exists ptb1_ybox`)
+		checkBox -e -value `optionVar -q ptb1_ybox` ptb1_ybox;
+	if (`optionVar -exists ptb1_zbox`)
+		checkBox -e -value `optionVar -q ptb1_zbox` ptb1_zbox;
+
+	if (`optionVar -exists ptb1_xvalue`)
+		floatField -e -value `optionVar -q ptb1_xvalue` ptb1_xvalue;
+	if (`optionVar -exists ptb1_yvalue`)
+		floatField -e -value `optionVar -q ptb1_yvalue` ptb1_yvalue;
+	if (`optionVar -exists ptb1_zvalue`)
+		floatField -e -value `optionVar -q ptb1_zvalue` ptb1_zvalue;
+
+	if (`optionVar -exists ptb1_rpBox`)
+		checkBox -e -value `optionVar -q ptb1_rpBox` ptb1_rpBox;
+	if (`optionVar -exists ptb1_spBox`)
+		checkBox -e -value `optionVar -q ptb1_spBox` ptb1_spBox;
+
+	if (`optionVar -exists ptb1_relMode`)
+		radioButtonGrp -e -select `optionVar -q ptb1_relMode` ptb1_relMode;
+
+	if ( `optionVar -exists ptb1_hierarchy` )
+		checkBox -e -value `optionVar -q ptb1_hierarchy` ptb1_hierarchy;
+
+	ptb_ui 1 0;
+
+// center pivot on object
+	if (`optionVar -exists ptb2_xbox`)
+		checkBox -e -value `optionVar -q ptb2_xbox` ptb2_xbox;
+	if (`optionVar -exists ptb2_ybox`)
+		checkBox -e -value `optionVar -q ptb2_ybox` ptb2_ybox;
+	if (`optionVar -exists ptb2_zbox`)
+		checkBox -e -value `optionVar -q ptb2_zbox` ptb2_zbox;
+
+	if (`optionVar -exists ptb2_rpBox`)
+		checkBox -e -value `optionVar -q ptb2_rpBox` ptb2_rpBox;
+	if (`optionVar -exists ptb2_spBox`)
+		checkBox -e -value `optionVar -q ptb2_spBox` ptb2_spBox;
+
+	if (`optionVar -exists ptb2_bb`)
+		optionMenu -e -select `optionVar -q ptb2_bb` ptb2_bb;
+
+	if (`optionVar -exists ptb2_mode`)
+		radioButtonGrp -e -select `optionVar -q ptb2_mode` ptb2_mode;
+
+	ptb_ui 2 0;
+
+// fit pivot
+	if (`optionVar -exists ptb3_xbox`)
+		checkBox -e -value `optionVar -q ptb3_xbox` ptb3_xbox;
+	if (`optionVar -exists ptb3_ybox`)
+		checkBox -e -value `optionVar -q ptb3_ybox` ptb3_ybox;
+	if (`optionVar -exists ptb3_zbox`)
+		checkBox -e -value `optionVar -q ptb3_zbox` ptb3_zbox;
+
+	if (`optionVar -exists ptb3_rpBox`)
+		checkBox -e -value `optionVar -q ptb3_rpBox` ptb3_rpBox;
+	if (`optionVar -exists ptb3_spBox`)
+		checkBox -e -value `optionVar -q ptb3_spBox` ptb3_spBox;
+
+	ptb_ui 3 0;
+
+// average pivots
+	if (`optionVar -exists ptb7_xbox`)
+		checkBox -e -value `optionVar -q ptb7_xbox` ptb7_xbox;
+	if (`optionVar -exists ptb7_ybox`)
+		checkBox -e -value `optionVar -q ptb7_ybox` ptb7_ybox;
+	if (`optionVar -exists ptb7_zbox`)
+		checkBox -e -value `optionVar -q ptb7_zbox` ptb7_zbox;
+
+	if (`optionVar -exists ptb7_rpBox`)
+		checkBox -e -value `optionVar -q ptb7_rpBox` ptb7_rpBox;
+	if (`optionVar -exists ptb7_spBox`)
+		checkBox -e -value `optionVar -q ptb7_spBox` ptb7_spBox;
+
+	if (`optionVar -exists ptb7_centerMode`)
+		radioButtonGrp -e -select `optionVar -q ptb7_centerMode` ptb7_centerMode;
+
+	ptb_ui 7 0;
+
+// center pivot on surface points
+	if (`optionVar -exists ptb8_xbox`)
+		checkBox -e -value `optionVar -q ptb8_xbox` ptb8_xbox;
+	if (`optionVar -exists ptb8_ybox`)
+		checkBox -e -value `optionVar -q ptb8_ybox` ptb8_ybox;
+	if (`optionVar -exists ptb8_zbox`)
+		checkBox -e -value `optionVar -q ptb8_zbox` ptb8_zbox;
+
+	if (`optionVar -exists ptb8_rpBox`)
+		checkBox -e -value `optionVar -q ptb8_rpBox` ptb8_rpBox;
+	if (`optionVar -exists ptb8_spBox`)
+		checkBox -e -value `optionVar -q ptb8_spBox` ptb8_spBox;
+
+	if (`optionVar -exists ptb8_selMode`)
+		radioButtonGrp -e -select `optionVar -q ptb8_selMode` ptb8_selMode;
+
+	if (`optionVar -exists ptb8_baseMode`)
+		radioButtonGrp -e -select `optionVar -q ptb8_baseMode` ptb8_baseMode;
+
+	if (`optionVar -exists ptb8_pointNumU`)
+		intSliderGrp -e -value `optionVar -q ptb8_pointNumU` ptb8_pointNumU;
+	if (`optionVar -exists ptb8_pointNumV`)
+		intSliderGrp -e -value `optionVar -q ptb8_pointNumV` ptb8_pointNumV;
+
+	ptb_ui 8 0;
+
+// center pivot on surface points
+	if (`optionVar -exists ptb16_xbox`)
+		checkBox -e -value `optionVar -q ptb16_xbox` ptb16_xbox;
+	if (`optionVar -exists ptb16_ybox`)
+		checkBox -e -value `optionVar -q ptb16_ybox` ptb16_ybox;
+	if (`optionVar -exists ptb16_zbox`)
+		checkBox -e -value `optionVar -q ptb16_zbox` ptb16_zbox;
+
+	if (`optionVar -exists ptb16_rpBox`)
+		checkBox -e -value `optionVar -q ptb16_rpBox` ptb16_rpBox;
+	if (`optionVar -exists ptb16_spBox`)
+		checkBox -e -value `optionVar -q ptb16_spBox` ptb16_spBox;
+
+	if (`optionVar -exists ptb16_selMode`)
+		radioButtonGrp -e -select `optionVar -q ptb16_selMode` ptb16_selMode;
+
+	if (`optionVar -exists ptb16_baseMode`)
+		radioButtonGrp -e -select `optionVar -q ptb16_baseMode` ptb16_baseMode;
+
+	if (`optionVar -exists ptb16_vertexNum`)
+		intSliderGrp -e -value `optionVar -q ptb16_vertexNum` ptb16_vertexNum;
+
+	ptb_ui 16 0;
+
+// center pivot on curve points
+	if (`optionVar -exists ptb4_xbox`)
+		checkBox -e -value `optionVar -q ptb4_xbox` ptb4_xbox;
+	if (`optionVar -exists ptb4_ybox`)
+		checkBox -e -value `optionVar -q ptb4_ybox` ptb4_ybox;
+	if (`optionVar -exists ptb4_zbox`)
+		checkBox -e -value `optionVar -q ptb4_zbox` ptb4_zbox;
+
+	if (`optionVar -exists ptb4_rpBox`)
+		checkBox -e -value `optionVar -q ptb4_rpBox` ptb4_rpBox;
+	if (`optionVar -exists ptb4_spBox`)
+		checkBox -e -value `optionVar -q ptb4_spBox` ptb4_spBox;
+
+	if (`optionVar -exists ptb4_selMode`)
+		radioButtonGrp -e -select `optionVar -q ptb4_selMode` ptb4_selMode;
+
+	if (`optionVar -exists ptb4_baseMode`)
+		radioButtonGrp -e -select `optionVar -q ptb4_baseMode` ptb4_baseMode;
+
+	if (`optionVar -exists ptb4_pointNum`)
+		intSliderGrp -e -value `optionVar -q ptb4_pointNum` ptb4_pointNum;
+
+	if (`optionVar -exists ptb4_pointType`)
+		radioButtonGrp -e -select `optionVar -q ptb4_pointType` ptb4_pointType;
+
+	ptb_ui 4 0;
+
+// unify pivots
+	if (`optionVar -exists ptb6_xbox`)
+		checkBox -e -value `optionVar -q ptb6_xbox` ptb6_xbox;
+	if (`optionVar -exists ptb6_ybox`)
+		checkBox -e -value `optionVar -q ptb6_ybox` ptb6_ybox;
+	if (`optionVar -exists ptb6_zbox`)
+		checkBox -e -value `optionVar -q ptb6_zbox` ptb6_zbox;
+
+	if (`optionVar -exists ptb6_mode`)
+		optionMenu -e -select `optionVar -q ptb6_mode` ptb6_mode;
+
+	ptb_ui 6 0;
+
+// fit object
+	if (`optionVar -exists ptb5_sourcePiv`)
+		radioButtonGrp -e -select `optionVar -q ptb5_sourcePiv` ptb5_sourcePiv;
+	if (`optionVar -exists ptb5_destPiv`)
+		radioButtonGrp -e -select `optionVar -q ptb5_destPiv` ptb5_destPiv;
+
+	if (`optionVar -exists ptb5_rotXBox`)
+		checkBox -e -value `optionVar -q ptb5_rotXBox` ptb5_rotXBox;
+	if (`optionVar -exists ptb5_rotYBox`)
+		checkBox -e -value `optionVar -q ptb5_rotYBox` ptb5_rotYBox;
+	if (`optionVar -exists ptb5_rotZBox`)
+		checkBox -e -value `optionVar -q ptb5_rotZBox` ptb5_rotZBox;
+
+// center object on pivot
+	if (`optionVar -exists ptb12_xbox`)
+		checkBox -e -value `optionVar -q ptb12_xbox` ptb12_xbox;
+	if (`optionVar -exists ptb12_ybox`)
+		checkBox -e -value `optionVar -q ptb12_ybox` ptb12_ybox;
+	if (`optionVar -exists ptb12_zbox`)
+		checkBox -e -value `optionVar -q ptb12_zbox` ptb12_zbox;
+
+	if (`optionVar -exists ptb12_mode`)
+		radioButtonGrp -e -select `optionVar -q ptb12_mode` ptb12_mode;
+
+	if (`optionVar -exists ptb12_sticky`)
+		checkBox -e -value `optionVar -q ptb12_sticky` ptb12_sticky;
+
+	if (`optionVar -exists ptb12_bb`)
+		optionMenu -e -select `optionVar -q ptb12_bb` ptb12_bb;
+
+	ptb_ui 12 0;
+
+// set local axis
+	if (`optionVar -exists ptb11_xbox`)
+		checkBox -e -value `optionVar -q ptb11_xbox` ptb11_xbox;
+	if (`optionVar -exists ptb11_ybox`)
+		checkBox -e -value `optionVar -q ptb11_ybox` ptb11_ybox;
+	if (`optionVar -exists ptb11_zbox`)
+		checkBox -e -value `optionVar -q ptb11_zbox` ptb11_zbox;
+
+	if (`optionVar -exists ptb11_xvalue`)
+		floatField -e -value `optionVar -q ptb11_xvalue` ptb11_xvalue;
+	if (`optionVar -exists ptb11_yvalue`)
+		floatField -e -value `optionVar -q ptb11_yvalue` ptb11_yvalue;
+	if (`optionVar -exists ptb11_zvalue`)
+		floatField -e -value `optionVar -q ptb11_zvalue` ptb11_zvalue;
+
+	if (`optionVar -exists ptb11_relMode`)
+		radioButtonGrp -e -select `optionVar -q ptb11_relMode` ptb11_relMode;
+
+	ptb_ui 11 0;
+
+// fit local axis
+	if ( `optionVar -exists ptb10_xbox` )
+		checkBox -e -value `optionVar -q ptb10_xbox` ptb10_xbox;
+	if ( `optionVar -exists ptb10_ybox` )
+		checkBox -e -value `optionVar -q ptb10_ybox` ptb10_ybox;
+	if ( `optionVar -exists ptb10_zbox` )
+		checkBox -e -value `optionVar -q ptb10_zbox` ptb10_zbox;
+	if ( `optionVar -exists ptb10_hierarchy` )
+		checkBox -e -value `optionVar -q ptb10_hierarchy` ptb10_hierarchy;
+
+	ptb_ui 10 0;
+
+// display pivot
+	if (`optionVar -exists ptb9_mode`)
+		radioButtonGrp -e -select `optionVar -q ptb9_mode` ptb9_mode;
+
+	if (`optionVar -exists ptb9_rbox`)
+		checkBox -e -value `optionVar -q ptb9_rbox` ptb9_rbox;
+	if (`optionVar -exists ptb9_sbox`)
+		checkBox -e -value `optionVar -q ptb9_sbox` ptb9_sbox;
+	if (`optionVar -exists ptb9_abox`)
+		checkBox -e -value `optionVar -q ptb9_abox` ptb9_abox;
+
+	ptb_ui 9 0;
+
+// print pivot
+	if (`optionVar -exists ptb13_mode`)
+		optionMenu -e -select `optionVar -q ptb13_mode` ptb13_mode;
+
+	if (`optionVar -exists ptb13_coordMode`)
+		radioButtonGrp -e -select `optionVar -q ptb13_coordMode` ptb13_coordMode;
+
+// create geometry
+	if (`optionVar -exists ptb14_sourcePiv`)
+		radioButtonGrp -e -select `optionVar -q ptb14_sourcePiv` ptb14_sourcePiv;
+	if (`optionVar -exists ptb14_destPiv`)
+		radioButtonGrp -e -select `optionVar -q ptb14_destPiv` ptb14_destPiv;
+
+	if (`optionVar -exists ptb14_geoMode`)
+		radioButtonGrp -e -select `optionVar -q ptb14_geoMode` ptb14_geoMode;
+
+	if (`optionVar -exists ptb14_groupMode`)
+		radioButtonGrp -e -select `optionVar -q ptb14_groupMode` ptb14_groupMode;
+
+	if (`optionVar -exists ptb14_replaceBox`)
+		checkBox -e -value `optionVar -q ptb14_replaceBox` ptb14_replaceBox;
+
+	if (`optionVar -exists ptb14_rotXBox`)
+		checkBox -e -value `optionVar -q ptb14_rotXBox` ptb14_rotXBox;
+	if (`optionVar -exists ptb14_rotYBox`)
+		checkBox -e -value `optionVar -q ptb14_rotYBox` ptb14_rotYBox;
+	if (`optionVar -exists ptb14_rotZBox`)
+		checkBox -e -value `optionVar -q ptb14_rotZBox` ptb14_rotZBox;
+
+	ptb_ui 14 0;
+
+// group at pivots
+	if (`optionVar -exists ptb15_xbox`)
+		checkBox -e -value `optionVar -q ptb15_xbox` ptb15_xbox;
+	if (`optionVar -exists ptb15_ybox`)
+		checkBox -e -value `optionVar -q ptb15_ybox` ptb15_ybox;
+	if (`optionVar -exists ptb15_zbox`)
+		checkBox -e -value `optionVar -q ptb15_zbox` ptb15_zbox;
+
+	if (`optionVar -exists ptb15_rpBox`)
+		checkBox -e -value `optionVar -q ptb15_rpBox` ptb15_rpBox;
+	if (`optionVar -exists ptb15_spBox`)
+		checkBox -e -value `optionVar -q ptb15_spBox` ptb15_spBox;
+
+	if (`optionVar -exists ptb15_centerMode`)
+		radioButtonGrp -e -select `optionVar -q ptb15_centerMode` ptb15_centerMode;
+
+	ptb_ui 15 0;
+
+// UI last selected tab
+	if (`optionVar -exists ptb_tab`)
+		tabLayout -e -sti `optionVar -q ptb_tab` ptb_tab;
+}
+
+
+//
+// Main procedure
+//
+
+global proc pivotToolbox ()
+{
+	// create UI
+	ptbCreateUI;
+	ptb_recallUI;
+
+	// create PTB exit scriptJob (delete help window)
+	scriptJob
+		-parent ui_ptb
+		-uiDeleted ui_ptb ui_ptbExit;
+
+	// create selection scriptJob
+	scriptJob
+		-parent ui_ptb
+		-event "SelectionChanged" ptb_selectionWatcher;
+
+	// call selection watcher once at PTB start to initialize UI
+	ptb_selectionWatcher;
+}
+
+
+//
+// Exit PTB scriptJob
+//
+
+global proc ui_ptbExit ()
+{
+	// delete help window
+	if (`window -exists ui_ptbHelp` == true)
+		deleteUI ui_ptbHelp;
+}
+
+
+//
+// Selection Watcher scriptJob
+//
+
+global proc ptb_selectionWatcher ()
+{
+	int $count;
+
+	// adjust UI surface parameter
+	string $objList[] = `filterExpand -ex true -sm 10`;
+	if (size($objList))
+	{
+		int $pointsU = 0;
+		int $pointsV = 0;
+		int $degreeU;
+		int $degreeV;
+		int $spansU;
+		int $spansV;
+		int $valueU;
+		int $valueV;
+
+		for ($count = 0; $count < size($objList); $count++)
+		{
+			$degreeU = `getAttr ($objList[$count] + ".degreeU")`;
+			$degreeV = `getAttr ($objList[$count] + ".degreeV")`;
+			$spansU = `getAttr ($objList[$count] + ".spansU")`;
+			$spansV = `getAttr ($objList[$count] + ".spansV")`;
+			$pointsU = `max $pointsU ($degreeU + $spansU)`;
+			$pointsV = `max $pointsV ($degreeV + $spansV)`;
+		}
+
+		$pointsU--;
+		$pointsV--;
+
+		$valueU = `intSliderGrp -q -value ptb8_pointNumU`;
+		$valueV = `intSliderGrp -q -value ptb8_pointNumV`;
+		if ($valueU > $pointsU)
+			$valueU = $pointsU;
+		if ($valueV > $pointsV)
+			$valueV = $pointsV;
+
+		intSliderGrp -e -maxValue $pointsU -value $valueU -extraLabel $pointsU ptb8_pointNumU;
+		intSliderGrp -e -maxValue $pointsV -value $valueV -extraLabel $pointsV ptb8_pointNumV;
+	}
+	else
+	{
+		intSliderGrp -e -extraLabel "--" ptb8_pointNumU;
+		intSliderGrp -e -extraLabel "--" ptb8_pointNumV;
+	}
+
+	// adjust UI poly object parameter
+	string $objList[] = `filterExpand -ex true -sm 12`;
+	if ( size( $objList ) )
+	{
+		int $points = 0;
+		int $value;
+
+		for ( $count = 0; $count < size( $objList ); $count++ )
+		{
+			int $vertices[] = `polyEvaluate -vertex $objList[$count]`;
+			$points = `max $points $vertices[0]`;
+		}
+
+		$points--;
+
+		$value = `intSliderGrp -q -value ptb16_vertexNum`;
+		if ( $value > $points )
+			$value = $points;
+
+		intSliderGrp -e -maxValue $points -value $value -extraLabel $points ptb16_vertexNum;
+	}
+	else
+		intSliderGrp -e -extraLabel "--" ptb16_vertexNum;
+
+	// adjust UI curve parameter
+	string $objList[] = `filterExpand -ex true -sm 9`;
+	if (size($objList))
+	{
+		int $points = 0;
+		int $degree;
+		int $spans;
+		int $value;
+
+		for ($count = 0; $count < size($objList); $count++)
+		{
+			if (`radioButtonGrp -q -select ptb4_pointType` == 1)
+			{
+				$degree = `getAttr ($objList[$count] + ".degree")`;
+				$spans = `getAttr ($objList[$count] + ".spans")`;
+				$points = `max $points ($degree + $spans)`;
+			}
+			else
+			{
+				$spans = `getAttr ($objList[$count] + ".spans")` + 1;
+				$points = `max $points $spans`;
+			}
+		}
+
+		$points--;
+
+		$value = `intSliderGrp -q -value ptb4_pointNum`;
+		if ($value > $points)
+			$value = $points;
+
+		intSliderGrp -e -maxValue $points -value $value -extraLabel $points ptb4_pointNum;
+	}
+	else
+		intSliderGrp -e -extraLabel "--" ptb4_pointNum;
+}
+
+
+//
+// Filter selected tranforms only
+//
+
+global proc string[] ptb_filterTransforms()
+{
+	// get selected objects
+	string $objList[] = `ls -sl`;
+	string $transList[];
+	int $count;
+	int $transCount = 0;
+
+	string $nodeTypes[] = {
+		 "transform",
+		 "joint",
+		 "ikHandle"
+		 };
+
+	// filter selected transform nodes
+	for ($count = 0; $count < size($objList); $count++)
+	{
+		for( $nodeType in $nodeTypes )
+		{
+			if ( `nodeType $objList[$count]` == $nodeType )
+			{
+				$transList[$transCount++] = $objList[$count];
+				break;
+			}
+		}
+	}
+
+	if ( !size( $transList ) )
+		error "No supported DAG node selected";
+	return ( $transList );
+}
+
+// recursive list hierarchy below
+
+global proc string[] ptb_listHierarchy( string $objList[] )
+{
+	string $temp[] = {};
+	string $transNode[] = {};
+
+	string $nodeTypes[] = {
+		 "transform",
+		 "joint",
+		 "ikHandle"
+		 };
+
+	global string $ptb_hierarchy[];		// hierarchical object list
+
+	for ( $cnt = 0; $cnt < size( $objList ); $cnt++ )
+	{
+		$transNode = {};
+		$temp = `listRelatives -children -fullPath $objList[$cnt]`;
+
+		for ( $tCnt = 0; $tCnt < size( $temp ); $tCnt++ )
+		{
+			for( $nodeType in $nodeTypes )
+			{
+				if ( `nodeType $temp[$tCnt]` == $nodeType )
+				{
+					$ptb_hierarchy[size( $ptb_hierarchy )] = $temp[$tCnt];
+					$transNode[size( $transNode )] = $temp[$tCnt];
+					break;
+				}
+			}
+		}
+		if ( size( $transNode ) )
+			ptb_listHierarchy $transNode; // call function recursive
+	}
+
+	return $temp;
+}
+
+//
+// Call Pivot Toolbox functions
+//
+
+global proc ptb_main (int $function)
+{
+	if ( `isTrue SomethingSelected` == false )
+		error "Nothing selected"; // stop script execution
+
+	switch ($function)
+	{
+		case 1:
+			ptbSetPivot;
+			break;
+		case 2:
+			ptbCenterPivot;
+			break;
+		case 3:
+			ptbFitPivot;
+			break;
+		case 4:
+			ptbCenterCurve;
+			break;
+		case 5:
+			ptbFitObject;
+			break;
+		case 6:
+			ptbUnifyPivots;
+			break;
+		case 7:
+			ptbAveragePivot;
+			break;
+		case 8:
+			ptbCenterSurface;
+			break;
+		case 9:
+			ptbDisplayPivot;
+			break;
+		case 10:
+			ptbFitLocalAxis;
+			break;
+		case 11:
+			ptbSetLocalAxis;
+			break;
+		case 12:
+			ptbCenterObject;
+			break;
+		case 13:
+			ptbPrintPivot;
+			break;
+		case 14:
+			ptbCreateGeometry;
+			break;
+		case 15:
+			ptbGroupAtPivots;
+			break;
+		case 16:
+			ptbCenterVertex;
+	}
+}
+
+// end of script

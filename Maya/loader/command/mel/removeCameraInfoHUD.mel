@@ -1,0 +1,5 @@
+global proc removeCameraInfoHUD()
+{
+	if(`headsUpDisplay -ex HUDCameraInfo`)
+		headsUpDisplay -rem HUDCameraInfo;
+}

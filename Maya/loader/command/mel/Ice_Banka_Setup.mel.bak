@@ -1,0 +1,605 @@
+//______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________//
+
+//																	GLOBAL VARIABLES																		     //		
+//______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________//
+
+
+
+global string $cameras;
+global string $banka;
+global string $sidekicks;
+global int $Cflag;
+global int $Bflag;
+global int $Sflag;
+
+//______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________//
+
+//																	METHODS																		     //		
+//______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________//
+
+
+
+	global proc sidekicksPath()
+	{
+		global string $sidekicks;
+		global int $Sflag;
+		string $projDir = basename(`workspace -q -rd`, "");
+		int $flag=`filetest -f ("P:/channelx/qawwals/02_production/"+$projDir+"/animation/Finished/sidekicks.ma")`;
+		if($flag==0)
+		{
+			$Sflag=0;
+			$sidekicks="";
+			
+		}
+		else
+		{
+			$Sflag=1;
+			$sidekicks="P:/channelx/qawwals/02_production/"+$projDir+"/animation/Finished/sidekicks.ma";
+		}
+	}
+
+
+
+
+	global proc bankaPath()
+	{
+		global string $banka;
+		global int $Bflag;
+		string $projDir = basename(`workspace -q -rd`, "");
+		int $flag=`filetest -f ("P:/channelx/qawwals/02_production/"+$projDir+"/animation/Finished/banka.ma")`;
+		if($flag==0)
+		{
+			$Bflag=0;
+			$banka="";
+			
+		}
+		else
+		{
+			$Bflag=1;
+			$banka="P:/channelx/qawwals/02_production/"+$projDir+"/animation/Finished/banka.ma";
+		}
+	}
+
+
+	
+	
+	global proc camerasPath()
+	{
+		global string $cameras;
+		global int $Cflag;
+		string $projDir = basename(`workspace -q -rd`, "");
+		int $flag=`filetest -f ("P:/channelx/qawwals/02_production/"+$projDir+"/animation/Finished/cameras.ma")`;
+		if($flag==0)
+		{
+			$Cflag=0;
+			$cameras="";
+			
+		}
+		else
+		{
+			$Cflag=1;
+			$cameras="P:/channelx/qawwals/02_production/"+$projDir+"/animation/Finished/cameras.ma";
+		}
+
+	}
+	global proc loadREF(string $path, string $namespace)
+	{
+		file -r -gl -loadReferenceDepth "all" -shd "renderLayersByName" -namespace $namespace -options "v=0" $path;
+	}
+
+	global proc setupmaterialoverides()
+	{
+		//5. Setup Material Overrides
+		$harmoniumFilter = `itemFilter -byName "*harmonium*"`;
+		$harmoniumGeo = `lsThroughFilter $harmoniumFilter`;
+	
+		$bankaGeo = `sets -q "banka:bankay_skinned_01_hair:bankay:all_geo_set"`;
+
+		$cap_geo = `sets -q "banka:bankay_skinned_01_hair:bankay:cap_set"`;
+		$kurta_geo = `sets -q "banka:bankay_skinned_01_hair:bankay:kurta_set"`;
+		$body_geo = `sets -q "banka:bankay_skinned_01_hair:bankay:body_set"`;
+		$pajama_geo = `sets -q "banka:bankay_skinned_01_hair:bankay:pajama_set"`;
+		$face_props_set = `sets -q "banka:bankay_skinned_01_hair:bankay:face_props_set"`;
+
+		editRenderLayerGlobals -currentRenderLayer "characters";
+		$stagefloorGeo = `sets -q "stage:floor_set"`;
+		$stagefloorGeo_forRefl = `duplicate -rr $stagefloorGeo`;
+		group -n "stage_for_refl_grp" $stagefloorGeo_forRefl; xform -os -piv 0 0 0 "stage_for_refl_grp";
+		sets -e -forceElement matte_useBackgroundSG $stagefloorGeo;
+
+		for($geo in $stagefloorGeo)
+		{
+			editRenderLayerAdjustment ($geo+".castsShadows");
+			editRenderLayerAdjustment ($geo+".visibleInReflections");
+			setAttr ($geo+".castsShadows") 0;
+			setAttr ($geo+".visibleInReflections") 0;
+		}
+
+		for($geo in $stagefloorGeo_forRefl)
+		{
+			editRenderLayerAdjustment ($geo+".castsShadows");
+			editRenderLayerAdjustment ($geo+".primaryVisibility");
+			setAttr ($geo+".castsShadows") 0;
+			setAttr ($geo+".primaryVisibility") 0;
+		}
+
+		/*$smoothSet = `sets -q "sidekicks:mirza:smooth_set"`;
+
+		for($psf in $smoothSet)
+		{
+			editRenderLayerAdjustment ($psf+".divisions");
+			setAttr ($psf+".divisions") 1;
+		}*/
+
+		editRenderLayerGlobals -currentRenderLayer "banka_matte";
+		sets -e -forceElement matte_cap_surfaceShaderSG $cap_geo;
+		sets -e -forceElement matte_skin_surfaceShaderSG $body_geo $face_props_set;
+		sets -e -forceElement matte_kurta_surfaceShaderSG $kurta_geo;
+		sets -e -forceElement matte_harmonium_surfaceShaderSG $harmoniumGeo;
+		sets -e -forceElement matte_useBackgroundSG $pajama_geo;
+
+		editRenderLayerGlobals -currentRenderLayer "banka_hair";
+		sets -e -forceElement matte_useBackgroundSG $bankaGeo;
+		$smoothSet = `sets -q "banka:bankay_skinned_01_hair:bankay:smooth_set"`;
+		editRenderLayerAdjustment "banka:bankay_skinned_01_hair:bankay_hair:hair_system.visibility";
+		setAttr "banka:bankay_skinned_01_hair:bankay_hair:hair_system.visibility" 1;
+		
+		
+		for($psf in $smoothSet)
+		{
+			editRenderLayerAdjustment ($psf+".divisions");
+			setAttr ($psf+".divisions") 1;
+		}
+
+		for($geo in $bankaGeo)
+		{
+			editRenderLayerAdjustment ($geo+".castsShadows");
+			setAttr ($geo+".castsShadows") 0;
+			editRenderLayerAdjustment ($geo+".receiveShadows");
+			setAttr ($geo+".receiveShadows") 0;
+		}
+
+		/*Change the Primary Visibility of duplicate items in Environment Layer*/
+		editRenderLayerGlobals -currentRenderLayer "environment";
+		for ($stageitem in $stagefloorGeo_forRefl)
+		{
+			setAttr ($stageitem+".primaryVisibility") 0;
+
+		}
+
+
+
+
+
+		editRenderLayerGlobals -currentRenderLayer "defaultRenderLayer";
+		select -cl;
+
+		progressBar -edit -step 100  setupmaterial;
+		progressBar -edit -step 10  Overallprogress;
+		button  -edit -enable 0 materialOverrides;
+		confirmDialog -title "Information" -message "Scene Configuration Completed !!!"  -button "OK"  -defaultButton "Cancel"   -cancelButton "No" ;
+		deleteUI -window icegui;
+
+
+
+
+	}
+	
+
+	global proc SetupLayerS()
+	{
+
+		//4. Setup Layers
+
+		$stageFilter = `itemFilter -byName "*stage*"`;
+
+		editRenderLayerMembers -nr "environment" `lsThroughFilter $stageFilter`;
+		editRenderLayerMembers -nr "characters" `sets -q "stage:floor_set"` `sets -q "stage:lights_set"`;
+
+		$bankaGeo = `sets -q "banka:bankay_skinned_01_hair:bankay:all_geo_set"`;
+
+		$harmoniumFilter = `itemFilter -byName "*harmonium*"`;
+		$harmoniumGeo = `lsThroughFilter $harmoniumFilter`;
+
+		$hairSystemGeo = `sets -q "banka:bankay_skinned_01_hair:hair_set"`;
+
+		$sidekicksFilter = `itemFilter -byName "sidekicks*"`;
+		$sidekicksGeo = `lsThroughFilter $sidekicksFilter`;
+
+		editRenderLayerMembers -nr "banka_matte" $bankaGeo $harmoniumGeo;
+		editRenderLayerMembers -nr "banka_hair" $bankaGeo $hairSystemGeo;
+
+		editRenderLayerMembers -nr "characters" $bankaGeo $harmoniumGeo $sidekicksGeo;
+		
+		button -edit -enable 1 materialOverrides;
+		progressBar -edit -step 100  setuplayers;
+		progressBar -edit -step 10  Overallprogress;
+		button  -edit -enable 0 setuplayers;
+
+
+
+	}
+
+	global proc Import()
+	{
+		
+			
+		if(` checkBox -q -v chkstage`==1)
+		{
+			global string $StagePathGrp;
+			if(`textFieldButtonGrp -q -text $StagePathGrp`!="")	
+			{
+
+				//0. Load Stage
+				
+				string $stage=CheckSlashes(`textFieldButtonGrp -q -text $StagePathGrp`);
+				loadREF($stage, "stage");
+				progressBar -edit -step 100  Stageprogress;
+				progressBar -edit -step 20  Overallprogress;
+
+	
+			}
+			else
+			{
+				confirmDialog -title "Error" -message "Stage Path Does not Exists ! ! !"  -button "Cancel"  -defaultButton "Cancel"   -cancelButton "No" ;
+
+			}	
+		
+		}
+
+		
+		if(` checkBox -q -v chkcamera`==1)
+		{
+			//1. Load Cameras
+			
+			global string $CameraPathGrp;
+			if(`textFieldButtonGrp -q -text $CameraPathGrp`!="")
+			{
+				string $cameras=CheckSlashes(`textFieldButtonGrp -q -text $CameraPathGrp`);
+				loadREF($cameras, "cameras");
+				progressBar -edit -step 100  Camerasprogress;
+				progressBar -edit -step 20  Overallprogress;
+
+			}
+			else
+			{
+				confirmDialog -title "Error" -message "Cameras Path Does not Exists ! ! !"  -button "Cancel"  -defaultButton "Cancel"   -cancelButton "No" ;
+
+			}
+
+			
+		}
+
+
+		if(` checkBox -q -v chkbanka`==1)
+		{
+			//2. Load Banka
+			global string $BankaPathGrp;
+			
+			if(`textFieldButtonGrp -q -text $BankaPathGrp`!="")
+			{
+				string $banka=CheckSlashes(`textFieldButtonGrp -q -text $BankaPathGrp`);
+				loadREF($banka,"banka");
+				progressBar -edit -step 100  Bankaprogress;
+				progressBar -edit -step 20  Overallprogress;
+
+
+			}
+			else
+			{
+				confirmDialog -title "Error" -message "Banka Path Does not Exists ! ! !"  -button "Cancel"  -defaultButton "Cancel"   -cancelButton "No" ;
+	
+			}
+	
+			
+		}
+
+		
+		if(`checkBox -q -v chksidekicks`==1)
+		{
+			//3. Load Sidekicks
+			global string $SideKicksPathGrp;
+			if(`textFieldButtonGrp -q -text $SideKicksPathGrp`!="")
+			{
+				string $sidekicks=CheckSlashes(`textFieldButtonGrp -q -text $SideKicksPathGrp`);
+				loadREF($sidekicks,"sidekicks");
+				progressBar -edit -step 100  sidekicksprogress;
+				progressBar -edit -step 20  Overallprogress;
+
+
+			}
+			else
+			{
+				confirmDialog -title "Error" -message "Side Kicks Path Does not Exists ! ! !"  -button "Cancel"  -defaultButton "Cancel"   -cancelButton "No" ;
+
+			}
+
+			
+		}
+	
+	if(`progressBar -q  -pr Overallprogress`==80)
+	{
+	 	button  -edit -enable 1 setuplayers;
+	 	button  -edit -enable 0 import;
+
+
+	}
+
+	else
+	{
+		confirmDialog -title "Error" -message "All Required Layers are not in the Scene Kindly Import all Layers !!!"  -button "OK"  -defaultButton "Cancel"   -cancelButton "No" ;
+	}
+	}	
+
+
+	global proc string CheckSlashes( string $filename )
+	{
+
+		string $result = $filename;
+		string $newResult;
+		$newResult = `substitute "\\\\" $result "/"`;
+		while( $newResult != $result )
+		{
+			$result = $newResult;
+			$newResult = `substitute "\\\\" $result "/"`;
+		}
+	
+		$result = $newResult;
+		$newResult = `substitute "//" $result "/"`;
+		while( $newResult != $result )
+		{
+			$result = $newResult;
+			$newResult = `substitute "//" $result "/"`;
+		}
+	
+		if( startsWith( $newResult, "/" ) )
+			$newResult = "/" + $newResult;
+	
+	return $newResult;
+	}
+
+
+
+	global proc close()
+	{
+			deleteUI -window icegui;
+
+	}
+	global proc Ice_Banka_Setup()
+	{
+		
+		if(`window  -ex icegui`==1)
+		{
+			deleteUI -window icegui;
+			iceGui();
+
+		}
+		else
+		{
+			iceGui();
+
+		}
+	}
+
+	global proc SetStageDir(string $filename, string $fileType)
+	{
+		global string $StagePathGrp;
+		textFieldButtonGrp -e -text $filename $StagePathGrp;
+		checkBox  -edit -en 1 -v 1 chkstage ;
+	
+	}
+
+	global proc SetCameraDir(string $filename, string $fileType)
+	{
+		global string $CameraPathGrp;
+		textFieldButtonGrp -e -text $filename $CameraPathGrp;
+		checkBox  -edit -en 1 -v 1 chkcamera;
+	
+	}
+
+	global proc SetBankaDir(string $filename, string $fileType)
+	{
+		global string $BankaPathGrp;
+		textFieldButtonGrp -e -text $filename $BankaPathGrp;
+		checkBox  -edit -en 1 -v 1 chkbanka;
+	
+	}
+
+
+	global proc SetSideKicksDir(string $filename, string $fileType)
+	{
+		
+		global string $SideKicksPathGrp;
+		textFieldButtonGrp -e -text $filename $SideKicksPathGrp;
+		checkBox  -edit -en 1 -v 1 chksidekicks;
+	
+	}
+
+
+	global proc  BrowseSideKicks()
+	{
+		
+		fileBrowserDialog -m 0 -fc "SetSideKicksDir" -an "Browse Side Kicks" -om "Import";
+	}
+
+	global proc  BrowseBanka()
+	{
+		
+		fileBrowserDialog -m 0 -fc "SetBankaDir" -an "Browse Banka" -om "Import";
+	}
+
+	global proc  BrowseCamera()
+	{
+		
+		fileBrowserDialog -m 0 -fc "SetCameraDir" -an "Browse Cameras" -om "Import";
+	}
+
+	global proc  BrowseStage()
+	{
+		
+		fileBrowserDialog -m 0 -fc "SetStageDir" -an "Browse Stage" -om "Import";
+	}
+
+	global proc SetBankaProject()
+	{
+		global string $ProjectPathGrp;
+//		$projectPath = `textFieldButtonGrp -q -fileName $ProjectPathGrp`;
+		SetProject "";//$projectPath;
+		Ice_Banka_Setup();
+	}
+
+
+//______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________//
+
+//																	GUI																		                 //		
+//______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________//
+
+
+global proc iceGui()
+{
+	sidekicksPath();
+	bankaPath();
+	camerasPath();
+	global string $StagePathGrp;	
+	global string $CameraPathGrp;
+	global string $BankaPathGrp;
+	global string $SideKicksPathGrp;
+	global string $gMainProgressBar;
+	global string $ProjectPathGrp;
+	global string $cameras;
+	global string $banka;
+	global string $sidekicks;
+	global int $Cflag;
+	global int $Bflag;
+	global int $Sflag;
+
+
+	string $projDir = basename(`workspace -q -rd`, "");
+	string $projectPath=CheckSlashes(`workspace -q -fn`);
+	workspace -dir $projectPath;
+
+	
+	window  -mnb true -t "ICE - Qawwali File Control Panel" -w 760 -h 550 -s 0 icegui;
+
+	paneLayout -configuration "vertical2" -ps 1 25 75;
+		image -image "P:/channelx/qawwals/assets/props/Icons/bankay.jpg";
+
+	setParent..;
+	paneLayout -configuration "horizontal3" -ps 1 62 38 -ps 2 18 44;
+				columnLayout -adjustableColumn true;
+					image -image "P:/channelx/qawwals/assets/props/Icons/bg.jpg" -h 50;
+					frameLayout -label "" -borderStyle "etchedIn" -labelVisible true -borderVisible true -collapsable false;
+						columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4;
+
+								
+								rowLayout -numberOfColumns 4 -cw4 450 450 450 450;
+									$ProjectPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Project Path"  -buttonLabel "..."   -fileName $projectPath  -annotation "Use this Maya project path to Set Project Path" frw_projectPath`;
+			 						textFieldButtonGrp -e -bc SetBankaProject $ProjectPathGrp;
+
+ 								setParent..;
+
+
+								rowLayout -numberOfColumns 4 -cw4 450 450 450 450;
+									$StagePathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Load Stage" -text "P:/channelx/qawwals/assets/environments/stage/Stage.mb"  -buttonLabel "..."  -annotation "Use this to load the Maya Stage File"  stagePath`;
+									textFieldButtonGrp -e -bc BrowseStage $StagePathGrp;
+									checkBox -label " Import " -align "center" -en 1 -v 1 chkstage ;
+ 								setParent..;
+
+								rowLayout -numberOfColumns 4 -cw4 450 450 450 450;
+									$CameraPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Load Cameras" -text $cameras -buttonLabel "..."  -annotation "Use this to load the Maya Cameras File" cameraPath`;
+									textFieldButtonGrp -e -bc BrowseCamera $CameraPathGrp;
+									checkBox -label " Import " -align "center" -en $Cflag -v $Cflag chkcamera;
+								setParent..;
+
+								rowLayout -numberOfColumns 4 -cw4 450 450 450 450;
+									$BankaPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Load Banka" -text $banka -buttonLabel "..."  -annotation "Use this to load the Maya Banka File" bankaPath`;
+									textFieldButtonGrp -e -bc BrowseBanka $BankaPathGrp;
+									checkBox -label " Import " -align "center" -en $Bflag -v $Bflag  chkbanka;
+								setParent..;
+
+								rowLayout -numberOfColumns 4 -cw4 450 450 450 450;
+									$SideKicksPathGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 110 -cw 2 300 -label "Load SideKicks" -text $sidekicks  -buttonLabel "..."  -annotation "Use this to load the Maya Side Kicks File" sidekicksPath`;
+									textFieldButtonGrp -e -bc BrowseSideKicks $SideKicksPathGrp;
+									checkBox -label " Import " -align "center" -en $Sflag -v $Sflag chksidekicks;
+								setParent..;
+
+
+						setParent..;
+					setParent..;
+				setParent..;
+
+
+
+
+				frameLayout -label "";
+					columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4 buttonColumnLayout;
+ 						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Stage Progress: " -align "center";
+							progressBar -maxValue 100 -width 300 Stageprogress;
+						setParent..;
+
+ 						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Cameras Progress: " -align "center";
+							progressBar -min 0 -maxValue 100 -width 300 Camerasprogress;
+						setParent..;
+
+ 						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Banka Progress: " -align "center";
+							progressBar -min 0 -maxValue 100 -width 300 Bankaprogress ;
+						setParent..;
+
+ 						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Side Kicks Progress: " -align "center";
+							progressBar -min 0 -maxValue 100 -width 300 sidekicksprogress;
+						setParent..;
+						
+						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Setup Layers Progress: " -align "center";
+							progressBar -min 0 -maxValue 100 -width 300 setuplayers;
+						setParent..;
+
+
+						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Setup Material Progress: " -align "center";
+							progressBar -min 0 -maxValue 100 -width 300 setupmaterial;
+						setParent..;
+
+
+						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+ 							text -label "Overall Progress: " -align "center";
+							progressBar -min 0 -maxValue 100 -width 300 Overallprogress;		
+						setParent..;
+
+
+
+
+
+
+
+					setParent..;
+				setParent..;
+
+
+				frameLayout -label "";
+					columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4 buttonColumnLayout;
+						rowLayout -numberOfColumns 4 -cw4 120 120 120 120;
+							button -label "Close" -width 110 -height 26 -align "center" -c close;
+							button -label "Import" -width 110 -height 26 -align "center" -c Import import;
+							button -label "Setup Layers" -width 110 -height 26 -align "center" -en false -c SetupLayerS setuplayers;
+							button -label "Setup Material Overrides" -width 150 -height 26 -align "center" -en false -c setupmaterialoverides materialOverrides;
+
+						setParent..;
+					setParent..;
+				setParent..;
+
+		    
+	setParent..;
+
+	
+
+showWindow icegui;
+
+}
+
+
+

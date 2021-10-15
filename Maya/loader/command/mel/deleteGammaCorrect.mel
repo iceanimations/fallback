@@ -1,0 +1,53 @@
+global proc deleteGammaCorrect()
+{
+	$selection = `ls -sl`;
+	$obj = $selection[0];
+	
+	if(size(`listRelatives -shapes $obj`)==0)
+	{
+		error("Select geometry!");
+		return;
+	}
+
+		
+	$shapes = `listRelatives -shapes $obj`;
+	$objShape = $shapes[0];
+		
+	// Get the shading engine attached to this geo
+	$SGs = `listConnections -type shadingEngine $objShape`;
+	$objSG = $SGs[0];
+	
+	$shaders = `listConnections -d 0 -s 1 ($objSG + ".surfaceShader")`;
+	
+	if(size($shaders)!=0)
+	{
+		$shader = $shaders[0];
+		$srcList = `listConnections -d 0 -s 1 ($shader + ".color")`;
+
+		if(size($srcList) != 0)
+		{
+			if(`nodeType $srcList[0]`!="gammaCorrect")
+				return;
+
+			$srcPlug = `connectionInfo -sfd ($srcList[0] + ".value")`;
+			
+			if($srcPlug != "")
+			{
+				disconnectAttr ($srcList[0] + ".outValue") ($shader + ".color");
+				connectAttr $srcPlug ($shader + ".color");
+			}
+			else
+			{
+				$color = `getAttr ($srcList[0] + ".value")`;
+				disconnectAttr ($srcList[0] + ".outValue") ($shader + ".color");
+				setAttr ($shader + ".color") $color[0] $color[1] $color[2];
+			}
+
+			delete $srcList[0];
+		}
+			
+	}
+
+	print("gammaCorrect node deleted successfully!\n");
+
+}

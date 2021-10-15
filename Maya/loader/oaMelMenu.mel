@@ -1,0 +1,205 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: oaMelMenu
+''    Author:  
+''    Last Updated: Nov 19, 2007
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/interface_display/3761.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+/*
+===========================================================================
+
+<NAME> oaMelMenu.mel </NAME>
+<VERSION> v1.1 </VERSION>
+<AUTHORS> Oleg Alexander (olegalexander@gmail.com) </AUTHORS>
+
+<DESCRIPTION>
+
+Creates a custom MEL menu that you could use to organize the MEL scripts
+in your scripts folder (or anywhere, with slight modification). Creates a
+menu item for each mel script.
+
+Clicking on a menu item will execute the procedure of the same name. For
+example, if the mel script is called myScript.mel, then the menu will try to
+execute 'myScript;'.
+
+Now works with Python scripts, too. Clicking on the menu item will execute the
+function of the same name. For example, if the python script is called myScript.py,
+the the menu will try to execute:
+	python "import myScript; reload(myScript); myScript.myScript()".
+
+Also creates an option box for each mel/python script that you could use to open
+the script externally.
+
+The menu creates a submenu for every subdirectory in your script path
+and appends all the directories to the MAYA_SCRIPT_PATH and to Python's sys.path!
+
+Inspired by Advanced Character Pipeline and Tools,
+AWGUA Siggraph 2003 - Maya Master Class Seminar,
+Instructors: Erick Miller, Paul Thuriot. </DESCRIPTION>
+
+<TO_USE>
+
+Copy oaMelMenu.mel to your scripts folder.
+Append 'oaMelMenu;' to your userSetup.mel file.
+Start Maya. You should see a new menu called 'MEL'.
+
+	o 	To execute a mel script, just click on a menu item.
+
+	o 	Clicking on the option box will open the mel script externally
+		with the default application associated with .mel/.py files.
+		(Tested on Windows XP.)
+
+	o   To change the root directory of the mel menu, change the
+		$MEL_MENU_ROOT_DIR variable below (around line 87).
+
+	o	Click the 'Rebuild This Menu' menu item to refresh the 'MEL' menu.
+		NOTE: This does not source all the mel scripts. If you are working
+		on a mel script, you still have to source it yourself. </TO_USE>
+
+<HISTORY>
+
+	v1.1 (Monday, November 19, 2007)
+		o Now works with Python scripts!
+
+	v1.0 (September 29, 2005)
+		o Original Release 	</HISTORY>
+
+IF YOU ENJOY THIS MEL SCRIPT, PLEASE RATE IT. I WOULD APPRECIATE IT. THANK YOU!
+===========================================================================
+*/
+
+
+//The "setup" proc that runs upon startup
+global proc oaMelMenu() {
+	
+	//Declare the Maya main menu global variable
+	global string $gMainWindow;
+		
+	//If the MEL menu already exists, delete it
+	if (`menu -exists oaMelMenu`) deleteUI oaMelMenu;
+		
+	//Create the MEL menu
+	string $melMenu = `menu -parent $gMainWindow -tearOff true -aob true -label "ICE Scripts" oaMelMenu`;
+	
+	//Print about the MayaScriptPath...
+	print "The following directories have been added to the MAYA_SCRIPT_PATH and to Python's sys.path:\n";
+
+
+	/*
+	CHANGE THIS VARIABLE TO ANY PATH WHERE YOU KEEP MEL SCRIPTS AND/OR PYTHON SCRIPTS
+	EXAMPLE 1: string $MEL_MENU_ROOT_DIR = (`internalVar -userScriptDir` + "myFolder/");
+	EXAMPLE 2: string $MEL_MENU_ROOT_DIR = "H:/NetworkDocuments/maya/scripts/";
+	Only use forward slashes and don't forget the forward slash at the end of the path!!
+	*/
+	string $MEL_MENU_ROOT_DIR = "R:/mel_scripts/";
+	
+
+	//Call the proc that will build the menu
+	oaMelMenuBuild $MEL_MENU_ROOT_DIR $melMenu;
+	
+	//Create the 'Rebuild This Menu' menu item
+	menuItem -divider true -parent $melMenu;
+	menuItem -parent $melMenu -label "Rebuild This Menu" -command "oaMelMenu";
+	
+	//Upadate the hotbox
+	hotBox -updateMenus;
+	
+	//Scan for new scripts in the new script path.
+	//THIS DOES NOT SOURCE ALL THE MEL SCRIPTS!
+ 	rehash;
+
+	//Append all directories from the MAYA_SCRIPT_PATH to Python's sys.path
+	if (`getApplicationVersionAsFloat` >= 8.5) {
+		string $MAYA_SCRIPT_PATH = `getenv "MAYA_SCRIPT_PATH"`;
+		string $paths[];
+		tokenize $MAYA_SCRIPT_PATH ";" $paths;
+		python "import sys";
+		for ($path in $paths) {
+		    //Remove the slash at the end of the path
+		    $path = `substitute "/$" $path ""`;
+			python ("sys.path.append(\""+$path+"\")");
+		}
+	}
+
+	//Print confirmation
+	print "MEL Menu Created Successfully.\n";
+
+}
+
+//oaMelMenu;
+
+
+//The proc to get the file list and create the menu items
+global proc oaMelMenuBuild(string $path, string $menu) {
+
+	//Get the MAYA_SCRIPT_PATH
+	string $MayaScriptPath = `getenv "MAYA_SCRIPT_PATH"`;
+
+	//Declare the $addPath variable
+	string $addPath = (";" + $path);
+
+	//Run a check if the path is already in the MayaScriptPath
+	if (`gmatch $MayaScriptPath ("*" + $path + "*")`) {
+		$addPath = "";
+	}
+
+	//Append to the MayaScriptPath
+	$MayaScriptPath += $addPath;
+	putenv "MAYA_SCRIPT_PATH" $MayaScriptPath;
+	print ($path + "\n");
+
+	//Get the file list from the specified folder
+	string $scriptsOrFolders[] = `getFileList -folder $path`;
+
+	for ($scriptOrFolder in $scriptsOrFolders) {
+
+		//If the file is a mel script, create the menu item
+		if (`gmatch $scriptOrFolder "*.mel"`) {
+
+			//Remove ".mel" from the end of the filename
+			$script = `substitute ".mel" $scriptOrFolder ""`;
+
+			//Create the menu item
+			menuItem -parent $menu -label $script -command $script;
+
+			//Declare the $openFile string
+			string $openFile = ("\"" + $path + $scriptOrFolder + "\"");
+
+		}
+
+		//If the file is a python script, create the menu item
+		if (`gmatch $scriptOrFolder "*.py"`) {
+
+			//Remove ".py" from the end of the filename
+			$script = `substitute ".py" $scriptOrFolder ""`;
+			string $pythonCommand = ("python \"import "+$script+"; reload("+$script+"); "+$script+"."+$script+"()\"");
+
+			//Create the menu item
+			menuItem -parent $menu -label $script -command $pythonCommand;
+
+			//Declare the $openFile string
+			string $openFile = ("\"" + $path + $scriptOrFolder + "\"");
+		}
+
+		//If the file is a folder, recurse into the folder
+		if (!`gmatch $scriptOrFolder "*.*"`) {
+
+			//Create a submenu for the folder
+			string $subMenuName = `menuItem -parent $menu -subMenu true -tearOff true -aob true -label $scriptOrFolder`;
+
+			//Recurse inside
+			$path += ($scriptOrFolder + "/");
+			oaMelMenuBuild $path $subMenuName;
+
+			//Reset the path to what it was before!!!!! Sheesh!
+			$path = `substitute ($scriptOrFolder + "/") $path ""`;
+		}
+	}
+}

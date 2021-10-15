@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>742</width>
+    <height>249</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>742</width>
+    <height>249</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>742</width>
+    <height>249</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Auto Save</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QSpinBox" name="limitBox">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>180</y>
+      <width>42</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Maximum number of files in autosave directory</string>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="customButton">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>50</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Specify a custom directory to save increments</string>
+    </property>
+    <property name="text">
+     <string>Custom</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="currentDirectoryButton">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>50</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>User current file's directory to save increments</string>
+    </property>
+    <property name="text">
+     <string>Current Directory</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="pathBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>70</y>
+      <width>491</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QToolButton" name="browseButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>70</y>
+      <width>25</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>...</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="intervalBox">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>129</y>
+      <width>42</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>How frequently to save the increment</string>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>5</number>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="enableButton">
+    <property name="geometry">
+     <rect>
+      <x>199</x>
+      <y>10</y>
+      <width>16</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Enable autosave</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="promptButton">
+    <property name="geometry">
+     <rect>
+      <x>199</x>
+      <y>30</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Promp before saving the file</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="limitButton">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>156</y>
+      <width>16</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Limit the number of files to be kept in autosave directory</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveButton">
+    <property name="geometry">
+     <rect>
+      <x>563</x>
+      <y>179</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="closeButton">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>179</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Close</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>129</x>
+      <y>10</y>
+      <width>61</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>Enable autosave</string>
+    </property>
+    <property name="text">
+     <string>Enable</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>12</x>
+      <y>30</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>Promp before saving the file</string>
+    </property>
+    <property name="text">
+     <string>Prompt before save</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>50</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>Where to save the files</string>
+    </property>
+    <property name="text">
+     <string>Location:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>131</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>How frequently to save the increment</string>
+    </property>
+    <property name="text">
+     <string>Interval (minutes):</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>156</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>Limit the number of files to be kept in autosave directory</string>
+    </property>
+    <property name="text">
+     <string>Limit autosaves</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="testButton">
+    <property name="geometry">
+     <rect>
+      <x>584</x>
+      <y>10</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Don't touch this button</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>Maximum number of files in autosave directory</string>
+    </property>
+    <property name="text">
+     <string>Max number of autosaves:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="nameBox">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>100</y>
+      <width>191</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Which name to give to the file</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>100</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="toolTip">
+     <string>Which name to give to the file</string>
+    </property>
+    <property name="text">
+     <string>Filename:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>742</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="userGuideAction"/>
+   </widget>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="userGuideAction">
+   <property name="text">
+    <string>User Guide</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>customButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pathBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>438</x>
+     <y>100</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>customButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browseButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>338</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>718</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>limitButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>limitBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>206</x>
+     <y>195</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>685</x>
+     <y>209</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>612</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

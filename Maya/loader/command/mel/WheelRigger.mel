@@ -1,0 +1,199 @@
+/*
+
+   WheelRigger v1.0
+
+
+
+   How to start.......
+   ````````````````````
+
+   --- source the script file...
+   --- Invoke the script using the command 						WheelRigger
+
+
+   How to use.......
+   ````````````````````
+
+   --- Make sure your wheel rotation axl points to X Axis ,so that the wheel direction will be in Z axis
+   --- Then, Freeze your wheel position.
+   --- Now, Invoke the script.
+   --- Select your wheel and focus the wheel name inputbox.
+   --- Type the radius of your wheel.
+
+   Click the Button RIGWHEEL.
+
+   --- Now your wheel is rigged. 
+   --- Just give the Translation and Orientation data from your main control to the locator given for the wheel rig.
+
+
+   Creator.......
+   ```````````````
+   V.Raja
+
+
+ */
+
+
+global proc WheelRigger()
+{
+    string $window = "WheelRigger";
+    if (`window -ex $window`)
+        deleteUI $window;
+    window $window;
+    formLayout -ann "Script by VRaja" -bgc 0.8313729763 0.8156859875 0.7843139768 -nd 1000 ($window + "FormLayout");
+    $control1 = `text -al left  -bgc 0.8313729763 0.8156859875 0.7843139768 -l "Wheel:"`;
+    $control2 = `textField -bgc 0.8313729763 0.8156859875 0.7843139768 -rfc "GetName" ObjNamer`;
+    $control3 = `text -al center  -bgc 0.400000006 0.400000006 0.400000006 -l ""`;
+    $control4 = `text -al left  -bgc 0.8313729763 0.8156859875 0.7843139768 -l "Wheel Radius:"`;
+    $control5 = `textField -bgc 0.8313729763 0.8156859875 0.7843139768 -tx 1 ObjRadius`;
+    $control6 = `button -bgc 0.8313729763 0.8156859875 0.7843139768 -l RigWheel -ann "Rig the wheel" -c "WheelSetup"`;
+    $control7 = `button -bgc 0.8313729763 0.8156859875 0.7843139768 -l Close -ann "Cancel" -c ("deleteUI " + $window)`;
+    $control8 = `button -bgc 0.8313729763 0.8156859875 0.7843139768 -l help  -c ("WRHelpWin")`;
+    $control9 = `button -bgc 0.8313729763 0.8156859875 0.7843139768 -l Freeze -ann "Freeze the wheel" -c "FreezeTransformations"`;
+
+
+    formLayout -e 
+        -attachPosition $control1 "left" 0 24	-attachPosition $control1 "right" 0 307	-attachPosition $control1 "top" 0 66	-attachPosition $control1 "bottom" 0 242
+        -attachPosition $control2 "left" 0 392	-attachPosition $control2 "right" 0 983	-attachPosition $control2 "top" 0 66	-attachPosition $control2 "bottom" 0 242
+        -attachPosition $control3 "left" 0 7	-attachPosition $control3 "right" 0 982	-attachPosition $control3 "top" 0 668	-attachPosition $control3 "bottom" 0 677
+        -attachPosition $control4 "left" 0 24	-attachPosition $control4 "right" 0 307	-attachPosition $control4 "top" 0 351	-attachPosition $control4 "bottom" 0 526
+        -attachPosition $control5 "left" 0 397	-attachPosition $control5 "right" 0 680	-attachPosition $control5 "top" 0 351	-attachPosition $control5 "bottom" 0 526
+        -attachPosition $control6 "left" 0 418	-attachPosition $control6 "right" 0 683	-attachPosition $control6 "top" 0 750	-attachPosition $control6 "bottom" 0 925
+        -attachPosition $control7 "left" 0 710	-attachPosition $control7 "right" 0 975	-attachPosition $control7 "top" 0 750	-attachPosition $control7 "bottom" 0 925
+        -attachPosition $control8 "left" 0 24	-attachPosition $control8 "right" 0 307	-attachPosition $control8 "top" 0 750	-attachPosition $control8 "bottom" 0 925
+        -attachPosition $control9 "left" 0 710	-attachPosition $control9 "right" 0 975	-attachPosition $control9 "top" 0 351	-attachPosition $control9 "bottom" 0 526
+
+
+
+        ($window + "FormLayout");
+    window -e -w 330 -h 144 $window;
+    showWindow $window;
+}
+
+global proc GetName()
+{
+    string $itm[] = `ls -sl`;
+    if(size($itm)==1)
+        textField	-e -tx $itm[0] ObjNamer;
+    else
+        warning "Please select the wheel and focus the input box!";
+
+}
+
+global proc string GroupConnector(string $itm,int $Rds)
+{
+
+    group -n ($itm + "_WheelRoller") $itm;
+    group -n ($itm + "Transformctrl") $itm;
+    group -n ($itm + "Rotationctrl") $itm;
+
+    global string $lcName[];
+    $lcName=`spaceLocator -n ($itm + "Ctrl")`;
+    pointConstraint -offset 0 0 0 -weight 1 -n WheelSetConstrain $itm ($itm+"Ctrl"); 
+    delete WheelSetConstrain;
+    makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 ($itm+"Ctrl");	
+    setAttr ($itm+"CtrlShape.localScaleX") 5;
+    setAttr ($itm+"CtrlShape.localScaleY") 5;
+    setAttr ($itm+"CtrlShape.localScaleZ") 5;
+    addAttr -ln "Radius" -at long;
+    setAttr -e -keyable true ($lcName[0]+".Radius");
+    setAttr ($lcName[0]+".Radius") $Rds;
+    parent ($itm+"Ctrl") ($itm + "_WheelRoller") ;
+    pointConstraint -offset 0 0 0 -weight 1 ($itm+"Ctrl") ($itm + "_WheelRoller|" + $itm + "Transformctrl");
+    orientConstraint -offset 0 0 0 -weight 1 ($itm+"Ctrl") ($itm + "_WheelRoller|" + $itm + "Transformctrl");
+
+    return 	$lcName[0];
+
+}
+
+global proc ExpConnector(string $itm,string $Radius,string $Lcn)
+{
+    print ("\n______________________________________________________"+$Lcn+"\n");
+    string $Ctrlr = ($itm + "Ctrl");
+    string $Transr = ($itm + "Transformctrl");
+    string $Rotar = ($itm + "Rotationctrl");
+    addAttr -ln "oldtranspos"  -at double3  $Ctrlr;
+    addAttr -ln "oldtransposX"  -at double -p oldtranspos  $Ctrlr;
+    addAttr -ln "oldtransposY"  -at double -p oldtranspos  $Ctrlr;
+    addAttr -ln "oldtransposZ"  -at double -p oldtranspos  $Ctrlr;
+    setAttr -type double3 ($Ctrlr + ".oldtranspos") 0 0 0;
+    setAttr -e-keyable false ($Ctrlr + ".oldtranspos");
+    setAttr -e-keyable false ($Ctrlr + ".oldtransposX");
+    setAttr -e-keyable false ($Ctrlr + ".oldtransposY");
+    setAttr -e-keyable false ($Ctrlr + ".oldtransposZ");
+    string $exp  = "vector $" 
+                    + $itm +  "oldtranspos =<< " 
+                    + $Ctrlr + ".oldtransposX," 
+                    + $Ctrlr + ".oldtransposY,"
+                    + $Ctrlr + ".oldtransposZ >>;\r\nfloat $radius = " 
+                    + $Lcn + ".Radius"+ " ;\r\n$distance = 0.0;\r\n$dctrl = 1;\r\n$dctrly=1;\r\nint $revdir=1 ;\r\nvector $changetrans = `getAttr " 
+                    + $Transr + ".translate`;\r\nfloat $cx = $changetrans.x-$" 
+                    + $itm +  "oldtranspos.x ;\r\nfloat $cy = $changetrans.y-$" 
+                    + $itm +  "oldtranspos.y ;\r\nfloat $cz = $changetrans.z-$" 
+                    + $itm +  "oldtranspos.z ;\r\nfloat $distance = sqrt($cx*$cx + $cy*$cy + $cz*$cz);\r\n$angltrd = " 
+                    + $Transr + ".rotateY%360;\r\nif (($changetrans.y != $" 
+                    + $itm +  "oldtranspos.y) && ($changetrans.x == $" 
+                    + $itm +  "oldtranspos.x)&&($changetrans.z == $" 
+                    + $itm +  "oldtranspos.z)){manipMoveContext -e -mode 4 Move;\r\n}else{		if ($angltrd==0){if ($changetrans.z > $" 
+                    + $itm +  "oldtranspos.z) $dctrl=1;\r\n	else $dctrl=-1;\r\n}	if (($angltrd>0 && $angltrd<=90)||($angltrd<-180 && $angltrd>=-270)){if ($changetrans.x > $" 
+                    + $itm +  "oldtranspos.x) $dctrl=1*$dctrl;\r\n else $dctrl=-1*$dctrl;\r\n}	if (($angltrd>90 && $angltrd<=180)||($angltrd<-90 && $angltrd>=-180)){if ($changetrans.z > $" 
+                    + $itm +  "oldtranspos.z) $dctrl=-1*$dctrl;\r\n	else $dctrl=1*$dctrl;\r\n}if (($angltrd>180 && $angltrd<=270)||($angltrd<0 && $angltrd>=-90)){if ($changetrans.x > $" 
+                    + $itm +  "oldtranspos.x) $dctrl=-1*$dctrl;\r\n	else $dctrl=1*$dctrl;\r\n}if (($angltrd>270 && $angltrd<=360)||($angltrd<-270 && $angltrd>=-360)){if ($changetrans.z > $" 
+                    + $itm +  "oldtranspos.z) $dctrl=1*$dctrl;\r\n	else $dctrl=-1*$dctrl;\r\n}	" 
+                    + $Rotar + ".rotateX = " 
+                    + $Rotar + ".rotateX + ($dctrly*($dctrl * (( $distance / (6.2831 * $radius)) * 360.0)));\r\nmanipMoveContext -e -mode 4 Move;\r\n}\r\n" 
+                    + $Ctrlr + ".oldtransposX = " + $Transr + ".translateX;" 
+                    + $Ctrlr + ".oldtransposY = " + $Transr + ".translateY;" 
+                    + $Ctrlr + ".oldtransposZ = " + $Transr + ".translateZ;\r\n";
+    print("\n\n" + $exp);
+    expression -s $exp;
+}
+
+global proc WheelSetup()
+{
+
+    string $itm = `textField	-q -tx ObjNamer`;
+    string $Rds = `textField	-q -tx ObjRadius`;
+
+    if(($itm!="") && ($Rds!=""))
+    {
+        string $Lcn=	GroupConnector ($itm,$Rds);
+        ExpConnector ($itm, $Rds,$Lcn);
+    }
+    else	
+    {
+        warning "Need radius and wheel object name";
+    }
+
+}
+
+
+global proc WRHelpWin()
+{
+
+    string $window = "Wheel_Rigger";
+    if (`window -ex $window`)
+        deleteUI $window;
+    window $window;
+    formLayout -ann "Script by VRaja" -bgc 0.8313729763 0.8156859875 0.7843139768 -nd 1000 ($window + "FormLayout");
+    $control1 = `button -bgc 0.8313729763 0.8156859875 0.7843139768 -l Close -ann "" -c ("deleteUI " + $window)`;
+    $control2 = `text -al center  -bgc 0.8313729763 0.8156859875 0.7843139768 -l "Wheel Rigger v1.0\r\nby vRaja"`;
+    $control3 = `text -al left  -bgc 0.8313729763 0.8156859875 0.7843139768 -l "\r\n\r\nHow to use?\r\n----------\r\n\r\n-Make sure your wheel rotation axl points to X Axis ,so that the wheel direction will be in Z axis.\r\n-Then, Freeze your wheel's position.\r\n-Now, Invoke `WheelRigger` script.\r\n-Select the wheel to be rigged and then focus the wheel name inputbox.\r\n-Type the radius of your wheel.\r\nNow Click the button `RigWheel`.\r\nYour wheel is rigged. \r\nJust give the Translation and Orientation data from your main control \r\nto the locator given for the wheel rig.\r\nYou can Adjust the Radius from the Locator channel \n\r\nCreator:\r\n--------\r\nV.Raja\r\nreachvraja@gmail.com\r\n"`;
+    formLayout -e 
+        -attachPosition $control1 "left" 0 752
+        -attachPosition $control1 "right" 0 968
+        -attachPosition $control1 "top" 0 930
+        -attachPosition $control1 "bottom" 0 983
+        -attachPosition $control2 "left" 0 112
+        -attachPosition $control2 "right" 0 876
+        -attachPosition $control2 "top" 0 15
+        -attachPosition $control2 "bottom" 0 99
+        -attachPosition $control3 "left" 0 29
+        -attachPosition $control3 "right" 0 970
+        -attachPosition $control3 "top" 0 97
+        -attachPosition $control3 "bottom" 0 929
+        ($window + "FormLayout");
+    window -e -w 362 -h 403 $window;
+    showWindow $window;
+
+}

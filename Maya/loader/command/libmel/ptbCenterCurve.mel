@@ -1,0 +1,232 @@
+/* ptb_centercurve.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date:	22.05.1998
+Last Update:	13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbCenterCurve ()
+{
+	if (`radioButtonGrp -q -select ptb4_selMode` == 2)
+	{
+		// set pivots to fixed CV/EP
+		string $objList[] = `filterExpand -ex true -sm 9`; // filter nurbs curves
+		int $count = `size ($objList)`;
+		int $point = `intSliderGrp -q -value ptb4_pointNum`;
+		string $mode;
+
+		if ($count == 0)
+			error "No nurbs curve selected";
+
+		if (`radioButtonGrp -q -select ptb4_pointType` == 1)
+			$mode = ".cv[";
+		else
+			$mode = ".ep[";
+
+		if (size (`ls -selection`) != size ($objList))
+			warning "Ignoring non nurbs curve objects";
+
+		$count -= 1;
+
+		for ($count; $count >= 0; $count--)
+		{
+			float $new[3] = `xform -q -ws -t ($objList[$count] + $mode + $point + "]")`;
+			float $rpOld[3] = `xform -q -ws -rp $objList[$count]`;
+			float $spOld[3] = `xform -q -ws -sp $objList[$count]`;
+
+			if (`checkBox -q -value ptb4_xbox`)
+			{
+				$rpOld[0] = $new[0];
+				$spOld[0] = $new[0];
+			}
+			if (`checkBox -q -value ptb4_ybox`)
+			{
+				$rpOld[1] = $new[1];
+				$spOld[1] = $new[1];
+			}
+			if (`checkBox -q -value ptb4_zbox`)
+			{
+				$rpOld[2] = $new[2];
+				$spOld[2] = $new[2];
+			}
+
+			if (`checkBox -q -value ptb4_rpBox`)
+				xform -ws -rp $rpOld[0] $rpOld[1] $rpOld[2] $objList[$count];
+			if (`checkBox -q -value ptb4_spBox`)
+				xform -ws -sp $spOld[0] $spOld[1] $spOld[2] $objList[$count];
+		}
+	}
+	else
+	{
+		// set pivots to selected CV/EP
+		string $selList[] = `filterExpand -ex true -sm 28 -sm 30`; // filter CV & EP
+		string $pntList[];
+		int $pntListArray[]; // how many points belong to one object
+		string $objList[];
+		string $buffer[];
+		string $oldBuffer;
+		string $shape[];
+		int $selCount;
+		int $pntCount = 0;
+		int $pntLACount = 0;
+
+		// build sorted point list from selected points
+		$selList = `sort $selList`; // sort selection alphabetically
+
+		for ($selCount = 0; $selCount < size($selList); $selCount++)
+		{
+			$oldBuffer = $buffer[0];
+			tokenize $selList[$selCount] "." $buffer;	// get object from point
+			$shape = `listRelatives -shapes $buffer[0]`;	// get shape node
+
+			if (`nodeType $shape[0]` == "nurbsCurve")	// is object nurbs curve?
+			{
+				$pntList[$pntCount++] = $selList[$selCount];
+				if ($oldBuffer != $buffer[0] && $selCount != 0)
+					$pntLACount++;
+				$pntListArray[$pntLACount] += 1;
+				$objList[$pntLACount] = $buffer[0];	// store object name
+			}
+			else
+				warning ("No nurbs curve point: " + $selList[$selCount] + " - ignored");
+		}
+
+		if (!size($pntList))
+			error "No nurbs curve points selected";
+
+		// center individual
+		if (`radioButtonGrp -q -select ptb4_baseMode` == 1)
+		{
+			int $objCount;
+			float $boundary[6];
+			float $bb[3];
+			int $count = 0;
+
+			for ($objCount = 0; $objCount < size($pntListArray); $objCount++)
+			{
+				// init boundary
+				$boundary = `xform -q -ws -t $pntList[$count]`;
+				$boundary[3] = $boundary[0];
+				$boundary[4] = $boundary[1];
+				$boundary[5] = $boundary[2];
+
+				// calculate bounding box around points
+				for ($pntCount = 0; $pntCount < $pntListArray[$objCount]; $pntCount++)
+				{
+					float $new[3] = `xform -q -ws -t $pntList[$count++]`;
+
+					$boundary[0] = `min $boundary[0] $new[0]`;
+					$boundary[1] = `min $boundary[1] $new[1]`;
+					$boundary[2] = `min $boundary[2] $new[2]`;
+					$boundary[3] = `max $boundary[3] $new[0]`;
+					$boundary[4] = `max $boundary[4] $new[1]`;
+					$boundary[5] = `max $boundary[5] $new[2]`;
+				}
+
+				// get bounding box center
+				$bb[0] = ($boundary[0] + $boundary[3]) / 2;
+				$bb[1] = ($boundary[1] + $boundary[4]) / 2;
+				$bb[2] = ($boundary[2] + $boundary[5]) / 2;
+
+				// set pivot(s) xyz
+				float $rpOld[3] = `xform -q -ws -rp $objList[$objCount]`;
+				float $spOld[3] = `xform -q -ws -sp $objList[$objCount]`;
+
+				if (`checkBox -q -value ptb4_xbox`)
+				{
+					$rpOld[0] = $bb[0];
+					$spOld[0] = $bb[0];
+				}
+				if (`checkBox -q -value ptb4_ybox`)
+				{
+					$rpOld[1] = $bb[1];
+					$spOld[1] = $bb[1];
+				}
+				if (`checkBox -q -value ptb4_zbox`)
+				{
+					$rpOld[2] = $bb[2];
+					$spOld[2] = $bb[2];
+				}
+
+				if (`checkBox -q -value ptb4_rpBox`)
+					xform -ws -rp $rpOld[0] $rpOld[1] $rpOld[2] $objList[$objCount];
+				if (`checkBox -q -value ptb4_spBox`)
+					xform -ws -sp $spOld[0] $spOld[1] $spOld[2] $objList[$objCount];
+			}
+		}
+
+		// center common
+		else
+		{
+			int $objCount;
+			float $boundary[6];
+			float $bb[3];
+			int $count = 0;
+
+			// init boundary
+			$boundary = `xform -q -ws -t $pntList[$count]`;
+			$boundary[3] = $boundary[0];
+			$boundary[4] = $boundary[1];
+			$boundary[5] = $boundary[2];
+
+			// calculate bounding box
+			for ($pntCount = 0; $pntCount < size($pntList); $pntCount++)
+			{
+				float $new[3] = `xform -q -ws -t $pntList[$count++]`;
+
+				$boundary[0] = `min $boundary[0] $new[0]`;
+				$boundary[1] = `min $boundary[1] $new[1]`;
+				$boundary[2] = `min $boundary[2] $new[2]`;
+				$boundary[3] = `max $boundary[3] $new[0]`;
+				$boundary[4] = `max $boundary[4] $new[1]`;
+				$boundary[5] = `max $boundary[5] $new[2]`;
+			}
+
+			// get bounding box center
+			$bb[0] = ($boundary[0] + $boundary[3]) / 2;
+			$bb[1] = ($boundary[1] + $boundary[4]) / 2;
+			$bb[2] = ($boundary[2] + $boundary[5]) / 2;
+
+			// set pivot(s) xyz
+			for ($objCount = 0; $objCount < size($objList);$objCount++)
+			{
+				float $rpOld[3] = `xform -q -ws -rp $objList[$objCount]`;
+				float $spOld[3] = `xform -q -ws -sp $objList[$objCount]`;
+
+				if (`checkBox -q -value ptb4_xbox`)
+				{
+					$rpOld[0] = $bb[0];
+					$spOld[0] = $bb[0];
+				}
+				if (`checkBox -q -value ptb4_ybox`)
+				{
+					$rpOld[1] = $bb[1];
+					$spOld[1] = $bb[1];
+				}
+				if (`checkBox -q -value ptb4_zbox`)
+				{
+					$rpOld[2] = $bb[2];
+					$spOld[2] = $bb[2];
+				}
+
+				if (`checkBox -q -value ptb4_rpBox`)
+					xform -ws -rp $rpOld[0] $rpOld[1] $rpOld[2] $objList[$objCount];
+				if (`checkBox -q -value ptb4_spBox`)
+					xform -ws -sp $spOld[0] $spOld[1] $spOld[2] $objList[$objCount];
+			}
+		}
+	}
+}
+
+// end of script

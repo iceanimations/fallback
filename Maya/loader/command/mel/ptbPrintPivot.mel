@@ -1,0 +1,62 @@
+/* ptbPrintPivot.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 24.05.2002
+
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbPrintPivot()
+{
+	string $objList[] = `ptb_filterTransforms`;
+	int $count = `size ($objList)`;
+	string $pivotMode;
+	float $piv[3];
+
+	string $coordMode;
+	if (`radioButtonGrp -q -select ptb13_coordMode` == 1)
+		$coordMode = "-ws";
+	else
+		$coordMode = "-os";
+
+	for ($count = 0; $count < size($objList); $count++)
+	{
+		int $mode = `optionMenu -q -select ptb13_mode`;
+		switch ($mode)
+		{
+			case 1:
+				$piv = `eval ("xform -q" + $coordMode + " -t " + $objList[$count])`;
+				$pivotMode = " (absolute)\n";
+				break;
+			case 2:
+				$piv = `eval ("xform -q" + $coordMode + " -sp " + $objList[$count])`;
+				$pivotMode = " (scale pivot)\n";
+				break;
+			case 3:
+				$piv = `eval ("xform -q" + $coordMode + " -rp " + $objList[$count])`;
+				$pivotMode = " (rotate pivot)\n";
+				break;
+			case 4:
+				if ($coordMode == "-ws")
+					$piv = `xform -q -ro $objList[$count]`;
+				else
+					$piv = `xform -q -ra $objList[$count]`;
+				$pivotMode = " (local axis)\n";
+				break;
+		}
+		print ($objList[$count] + "> X:" + $piv[0] + " Y:" + $piv[1] + " Z:" + $piv[2] + $pivotMode);
+	}
+}
+
+// end of script

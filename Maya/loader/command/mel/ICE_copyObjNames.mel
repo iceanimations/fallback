@@ -1,0 +1,26 @@
+global proc ICE_copyObjNames()
+{
+    string $selection[];
+    $selection = `ls -sl`;
+    
+    int $size = size($selection);
+    
+    if($size==0)
+    {
+        error("You must select at least two objects!\n");
+        return;
+    }
+    
+    if($size%2!=0)
+        warning("The selection is not in pairs. First pair of objects will be renamed, rest will be ignored!\n");
+    
+    for($i=0; $i<$size/2; $i++)
+    {
+        string $buffer[];
+        tokenize $selection[$i] "|" $buffer;
+        
+        rename $selection[($size/2)+$i] $buffer[size($buffer)-1];
+    }
+    
+    print("All names copied successfully!\n");
+}

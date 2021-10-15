@@ -1,0 +1,43 @@
+/* ptbSetLocalAxis.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbSetLocalAxis ()
+{
+	string $objList[] = `ptb_filterTransforms`;
+	int $count = `size ($objList)`;
+	$count -= 1;
+
+	for ($count; $count >= 0; $count--)
+	{
+		// object space
+		float $xyz[3] = `xform -q -ra $objList[$count]`;
+		if (`checkBox -q -value ptb11_xbox`)
+			$xyz[0] = `floatField -q -value ptb11_xvalue`;
+		if (`checkBox -q -value ptb11_ybox`)
+			$xyz[1] = `floatField -q -value ptb11_yvalue`;
+		if (`checkBox -q -value ptb11_zbox`)
+			$xyz[2] = `floatField -q -value ptb11_zvalue`;
+
+		if (`radioButtonGrp -q -select ptb11_relMode` == 1)
+			xform -a -p true -roo zyx -ra $xyz[0] $xyz[1] $xyz[2] $objList[$count];
+		else
+			xform -r -eu -p true -roo zyx -ra $xyz[0] $xyz[1] $xyz[2] $objList[$count];
+	}
+}
+
+// end of script

@@ -1,0 +1,49 @@
+global proc REM_lightLink(){
+
+int $c=0;
+int $re=2;
+
+string $linked[] =`connectionInfo -dfs "defaultLightSet.message"`;
+for ($link in $linked) {
+	if (`match "lightLinker" $link` != "lightLinker" || $link=="") 
+		print ($link + " is not lightLink\n");
+	else{
+		disconnectAttr defaultLightSet.message $link;
+		$c++;
+	}
+}
+
+string $listSG[]=`ls -type "shadingEngine"`;
+for ($i=0;$i<`size($listSG)`;$i++){
+string $links[]=`connectionInfo -dfs ($listSG[$i]+".message")`;
+for ($link in $links) {
+	if (`match "lightLinker" $link` != "lightLinker" || $link=="") 
+		print ($link + " is not lightLink\n");
+	else{
+		disconnectAttr ($listSG[$i]+".message") $link;
+		$c++;
+		}
+	}
+}
+
+//restore default connections
+for ($i=0;$i<`size($listSG)`;$i++){
+if (`match "initialParticleSE" $listSG[$i]` != "initialParticleSE" && `match "initialShadingGroup" $listSG[$i]` != "initialShadingGroup" ){
+	connectAttr ($listSG[$i]+".message") ("lightLinker1.shadowLink["+$re+"].shadowObject");
+	connectAttr ($listSG[$i]+".message") ("lightLinker1.link["+$re+"].object");
+	$re++;
+}
+}
+$re=$re*2;
+connectAttr defaultLightSet.message lightLinker1.shadowLink[0].shadowLight;
+connectAttr defaultLightSet.message lightLinker1.link[0].light;
+connectAttr initialShadingGroup.message lightLinker1.shadowLink[0].shadowObject;
+connectAttr initialShadingGroup.message lightLinker1.link[0].object;
+connectAttr initialParticleSE.message lightLinker1.shadowLink[1].shadowObject;
+connectAttr initialParticleSE.message lightLinker1.link[1].object;
+$re=$re+2;
+
+
+print ($c + " lightLink deleted. "+$re+" lightLink restored.\n");
+}
+

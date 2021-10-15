@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>767</width>
+    <height>585</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Create Shots</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="shotsLayout">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Shots Dir   </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="shotsFilePathBox">
+        <property name="toolTip">
+         <string>Add directory where you see list of shots</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browseButton2">
+        <property name="toolTip">
+         <string>Browse for directory</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>CSV File    </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="csvFilePathBox">
+        <property name="toolTip">
+         <string>Add path to CSV file</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browseButton">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTextEdit" name="statusBox">
+        <property name="lineWrapMode">
+         <enum>QTextEdit::NoWrap</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Output Dir</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="outputPathBox">
+        <property name="toolTip">
+         <string>Path to save Maya files</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browseButton1">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="saveToLocalButton">
+        <property name="toolTip">
+         <string>Specify a location to save Maya files</string>
+        </property>
+        <property name="text">
+         <string>Add Location</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="resolutionBox">
+        <property name="toolTip">
+         <string>Select Resolution</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="useRendersButton">
+        <property name="toolTip">
+         <string>Create Collage using renders</string>
+        </property>
+        <property name="text">
+         <string>Use Renders</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="createFilesButton">
+        <property name="toolTip">
+         <string>Create and save Maya files</string>
+        </property>
+        <property name="text">
+         <string>Create Files</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="createCollageButton">
+        <property name="toolTip">
+         <string>Take snapshots for each Shot and create a Collage</string>
+        </property>
+        <property name="text">
+         <string>Create Collage</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="startButton">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stopButton">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="closeButton">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>767</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>closeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>756</x>
+     <y>574</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>159</x>
+     <y>601</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>createFilesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>saveToLocalButton</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>377</x>
+     <y>563</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>156</x>
+     <y>571</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveToLocalButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>561</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>24</x>
+     <y>532</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveToLocalButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>outputPathBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>156</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>341</x>
+     <y>534</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveToLocalButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browseButton1</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>144</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>747</x>
+     <y>526</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>createCollageButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>useRendersButton</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>473</x>
+     <y>567</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>268</x>
+     <y>562</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useRendersButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>resolutionBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>556</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>206</x>
+     <y>553</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,50 @@
+global proc insertGammaCorrect()
+{
+	$selection = `ls -sl`;
+	$obj = $selection[0];
+	
+	if(size(`listRelatives -shapes $obj`)==0)
+	{
+		error("Select geometry!");
+		return;
+	}
+
+		
+	$shapes = `listRelatives -shapes $obj`;
+	$objShape = $shapes[0];
+		
+	// Get the shading engine attached to this geo
+	$SGs = `listConnections -type shadingEngine $objShape`;
+	$objSG = $SGs[0];
+	
+	$shaders = `listConnections -d 0 -s 1 ($objSG + ".surfaceShader")`;
+	
+	if(size($shaders)!=0)
+	{
+		$shader = $shaders[0];
+		$srcPlug = `connectionInfo -sfd ($shader + ".color")`;
+		$srcList = `listConnections -d 0 -s 1 ($shader + ".color")`;
+
+		if($srcPlug != "")
+		{
+			if(`nodeType $srcList[0]`=="gammaCorrect")
+				return;
+
+			$gc = `createNode gammaCorrect -n ($shader + "_gammaCorrect")`;
+			setAttr ($gc + ".gamma") 0.455 0.455 0.455;
+			connectAttr $srcPlug ($gc + ".value");
+			disconnectAttr $srcPlug ($shader + ".color");
+			connectAttr ($gc + ".outValue") ($shader + ".color");
+		}
+		else
+		{
+			$gc = `createNode gammaCorrect -n ($shader + "_gammaCorrect")`;
+			setAttr ($gc + ".gamma") 0.455 0.455 0.455;
+			$color = `getAttr ($shader + ".color")`;
+			setAttr ($gc + ".value") $color[0] $color[1] $color[2];
+			connectAttr ($gc + ".outValue") ($shader + ".color");
+		}	
+	}
+
+	print("gammaCorrect node added successfully!\n");
+}

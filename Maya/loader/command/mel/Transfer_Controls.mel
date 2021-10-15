@@ -1,0 +1,14 @@
+global proc Transfer_Controls()
+{
+    python("import site\nsite.addsitedir(r'\\\\ice-sql\\Storage\\repository\\Python_Scripts')");
+    string $pyCommand = "" + 
+    "\ntry:" + 
+    "\n    reload(plugins.rig_transfer)" + 
+    "\nexcept NameError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.rig_transfer" +
+    "\nexcept AttributeError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.rig_transfer" ;
+    python($pyCommand);
+}

@@ -1,0 +1,122 @@
+/* ptbGroupAtPivots.mel
+
+Copyright 1999-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date:	03.08.1999
+Last Update:	13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbGroupAtPivots ()
+{
+	string $objList[] = `ptb_filterTransforms`;
+	float $sp[3];
+	float $rp[3];
+	float $pos[3];
+	int $objNum = size( $objList );
+
+	int $mode = `radioButtonGrp -q -select ptb15_centerMode`;
+
+	switch ( $mode )
+	{
+		// calculate bounding box pivot position from all selected objects (normal)
+		case 1:
+			float $spInit[3] = `xform -q -ws -sp $objList[0]`;
+			float $spBB[6] = {$spInit[0], $spInit[1], $spInit[2], $spInit[0], $spInit[1], $spInit[2]};
+
+			float $rpInit[3] = `xform -q -ws -rp $objList[0]`;
+			float $rpBB[6] = {$rpInit[0], $rpInit[1], $rpInit[2], $rpInit[0], $rpInit[1], $rpInit[2]};
+
+			for ($count = 0; $count < $objNum; $count++)
+			{
+				$pos = `xform -q -ws -sp $objList[$count]`;
+				$spBB[0] = `min $spBB[0] $pos[0]`;
+				$spBB[1] = `min $spBB[1] $pos[1]`;
+				$spBB[2] = `min $spBB[2] $pos[2]`;
+				$spBB[3] = `max $spBB[3] $pos[0]`;
+				$spBB[4] = `max $spBB[4] $pos[1]`;
+				$spBB[5] = `max $spBB[5] $pos[2]`;
+
+				$pos = `xform -q -ws -rp $objList[$count]`;
+				$rpBB[0] = `min $rpBB[0] $pos[0]`;
+				$rpBB[1] = `min $rpBB[1] $pos[1]`;
+				$rpBB[2] = `min $rpBB[2] $pos[2]`;
+				$rpBB[3] = `max $rpBB[3] $pos[0]`;
+				$rpBB[4] = `max $rpBB[4] $pos[1]`;
+				$rpBB[5] = `max $rpBB[5] $pos[2]`;
+			}
+
+			$sp[0] = ($spBB[0] + $spBB[3]) / 2;
+			$sp[1] = ($spBB[1] + $spBB[4]) / 2;
+			$sp[2] = ($spBB[2] + $spBB[5]) / 2;
+
+			$rp[0] = ($rpBB[0] + $rpBB[3]) / 2;
+			$rp[1] = ($rpBB[1] + $rpBB[4]) / 2;
+			$rp[2] = ($rpBB[2] + $rpBB[5]) / 2;
+			break;
+
+		// calculate average pivot position from all selected objects (weighted)
+		case 2:
+			for ($count = 0; $count < $objNum; $count++)
+			{
+				$pos = `xform -q -ws -sp $objList[$count]`;
+				$sp[0] += $pos[0];
+				$sp[1] += $pos[1];
+				$sp[2] += $pos[2];
+				$pos = `xform -q -ws -rp $objList[$count]`;
+				$rp[0] += $pos[0];
+				$rp[1] += $pos[1];
+				$rp[2] += $pos[2];
+			}
+
+			$sp[0] /= $objNum;
+			$sp[1] /= $objNum;
+			$sp[2] /= $objNum;
+
+			$rp[0] /= $objNum;
+			$rp[1] /= $objNum;
+			$rp[2] /= $objNum;
+			break;
+
+		// use last selected object for pivot position
+		case 3:
+			$sp = `xform -q -ws -sp $objList[size ( $objList ) - 1]`;
+			$rp = `xform -q -ws -rp $objList[size ( $objList ) - 1]`;
+			break;
+	}
+
+	string $grp = `group $objList`;
+
+	float $spOld[3];
+	float $rpOld[3];
+
+	if (`checkBox -q -value ptb15_xbox`)
+		if (`checkBox -q -value ptb15_spBox`)
+			$spOld[0] = $sp[0];
+		if (`checkBox -q -value ptb15_rpBox`)
+			$rpOld[0] = $rp[0];
+	if (`checkBox -q -value ptb7_ybox`)
+		if (`checkBox -q -value ptb15_spBox`)
+			$spOld[1] = $sp[1];
+		if (`checkBox -q -value ptb15_rpBox`)
+			$rpOld[1] = $rp[1];
+	if (`checkBox -q -value ptb7_zbox`)
+		if (`checkBox -q -value ptb15_spBox`)
+			$spOld[2] = $sp[2];
+		if (`checkBox -q -value ptb15_rpBox`)
+			$rpOld[2] = $rp[2];
+
+	xform -a -ws -sp $spOld[0] $spOld[1] $spOld[2] $grp;
+	xform -a -ws -rp $rpOld[0] $rpOld[1] $rpOld[2] $grp;
+}
+
+// end of script

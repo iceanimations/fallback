@@ -1,0 +1,37 @@
+/*
+
+                Umair Ahmed
+
+
+*/
+
+
+global proc ShaveNodeSwitcher()
+{
+
+    int $val;
+    string $items[]=`lsType("shaveHair")`;
+    string $item;
+    int $len=size($items);
+    for ($i = 0; $i <=$len-2 ; $i++)
+    {
+        string $cmmd2="getAttr "+$items[$i]+".active";
+        int $flag=eval($cmmd2);
+        if($flag==1)
+        {
+            $val=0;
+        }
+        else
+        {
+            $val=1;
+        }
+        string $cmmd="setAttr "+$items[$i]+".active "+$val;
+        catch(eval($cmmd));
+                  
+        
+   
+
+
+    }
+}
+ShaveNodeSwitcher()

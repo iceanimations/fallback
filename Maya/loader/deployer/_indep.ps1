@@ -1,0 +1,1 @@
+Invoke-Expression ".\_individual_deployer.bat"

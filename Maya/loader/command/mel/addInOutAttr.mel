@@ -1,0 +1,43 @@
+global proc addInOutAttr()
+{
+	// add in and out attributes to the selected camera shape
+	$selection = `ls -sl`;
+
+	if(size($selection)==0)
+	{
+		warning("Please select a camera!\n");
+		return;
+	}
+
+	for ($sel in $selection)
+	{
+
+		$camShapes = `listRelatives -shapes $sel`;
+		$animCurves = `listConnections -scn 1 -d 0 -s 1 $sel`;
+		float $frames[];
+
+		if(size($animCurves)>0)
+			$frames = `keyframe -q $animCurves[0]`;
+
+		if(`attributeExists "in" $camShapes[0]`==0)
+		{
+			addAttr -ln "in"  -at double $camShapes[0];
+			setAttr -e-keyable true ($camShapes[0]+".in");
+
+			if(size($frames)>0)
+				setAttr ($camShapes[0]+".in") ($frames[0]);
+
+			print("\"in\" attribute added to "+$sel+"\n");
+		}
+
+		if(`attributeExists "out" $camShapes[0]`==0)
+		{
+			addAttr -ln "out"  -at double $camShapes[0];
+			setAttr -e-keyable true ($camShapes[0]+".out");
+
+			if(size($frames)>0)
+				setAttr ($camShapes[0]+".out") ($frames[size($frames)-1]);
+			print("\"out\" attribute added to "+$sel+"\n");
+		}
+	}
+}

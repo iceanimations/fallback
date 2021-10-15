@@ -1,0 +1,88 @@
+/*	 
+////////////////////////////////////////////////////////////////////////////////////////////////
+''	  Ice Animations Pvt Ltd.
+''    Script Name: Non Quad Faces v1.0
+''    Author: Johar Ali
+''	  Creation Data: 6/3/2010
+''    Last Updated: April 10, 2010
+''    
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//Non Quad Faces 1.0
+//
+//About script.
+//
+//it's working with Maya 8, 9, 10.
+//
+//This mel checks and highlights the number of faces other than quads.
+//
+//Just select the polygon object and run the script.
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+global proc ICE_selectNonQuads()
+{
+	$sel = `ls -sl`;									//Selecting the name of the object.
+	
+	string $objShape[] = `listRelatives -shapes`;				// Throughing exception if the poly object is not selected.
+	string $objType = `objectType $objShape[0]`;
+	if(size($sel) == 0 || $objType != "mesh")
+	error "Please select any polygon object";
+
+	
+	$obj = $sel[0];
+	int $CountOddFaces = 0;
+	int $CountEvenFaces = 0;
+	string $Newstrdata[];
+	int $i;
+	string $n1;
+	int $j;
+	
+	int $Faces[] = `polyEvaluate -f $obj`;   					 // Counting Faces of the object.
+	
+	if(!(`objExists matRed`))
+	{
+		renderCreateBarCB -asShader "surfaceShader" lambert;        // Creating Shader 
+		rename matRed;
+		setAttr "matRed.color" 0.000 1.0000 1.000;
+	}
+	
+	/*
+	for($j = 0; $j <= $Faces[0] - 1; $j++)				//Running Loop for each face of the object.
+	{
+		select -r ($obj+".f["+$j+"]");				//Selecting individual face.
+		
+	string $Newstrdata[] = `polyInfo -faceToVertex`;		//Getting vertex of each individual face.
+		
+	string $temp = $Newstrdata[0];
+		int $len = size($temp);
+		$n1 = `substring $temp 17 $len`;
+		
+		string $StrArray[] = stringToStringArray($n1, " ");		//Assigning each set of characters from a string to a string array
+		if((size($StrArray) - 1) != 4)					//Checking the number of vertex in face.
+		{		
+			$CountOddFaces++;		
+			hyperShade -assign matRed;					//Assigning Color to the odd faces.
+	
+		}	
+		else if((size($StrArray) - 1) % 2 == 0)
+		{
+			$CountEvenFaces++;
+			hyperShade -assign lambert1;					
+	
+		}
+	}	
+	print("\nOdd Faces: " + $CountOddFaces);
+	print("\nEven Faces: " + $CountEvenFaces + "\n");
+	*/
+	
+	polyCleanupArgList 3 { "0","2","1","1","0","0","0","0","0","1e-005","0","1e-005","0","1e-005","0","-1","0" };
+	hyperShade -assign matRed;
+
+}
+
+ICE_selectNonQuads();
+

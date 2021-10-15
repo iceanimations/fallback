@@ -1,0 +1,33 @@
+global proc ICE_copyGrpNames()
+{
+    string $selection[];
+    $selection = `ls -sl`;
+    
+    int $size = size($selection);
+        
+    if($size==0)
+    {
+        error("You must select at least two objects!\n");
+        return;
+    }
+        
+    $srcList = `listRelatives -c -ni -pa $selection[0]`;
+    
+    if(size($srcList)==0)
+        return;
+    
+    for($i=1;$i<$size;$i++)
+    {    
+        $destList = `listRelatives -c -ni -pa $selection[$i]`;
+        
+        if(size($destList)==0)
+            continue;
+           
+        select $srcList $destList;
+        ICE_copyObjNames();
+        
+        print("child names copied: "+$selection[0]+"-->"+$selection[$i]+"\n");
+    }
+    
+    select -cl;
+}

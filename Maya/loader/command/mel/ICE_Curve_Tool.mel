@@ -1,0 +1,14 @@
+global proc ICE_Curve_Tool()
+{
+    python("import site\nsite.addsitedir(r'\\\\ice-sql\\Storage\\repository\\Python_Scripts')");
+    string $pyCommand = "" + 
+    "\ntry:" + 
+    "\n    reload(plugins.curve_tools)" + 
+    "\nexcept NameError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.curve_tools" +
+    "\nexcept AttributeError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.curve_tools" ;
+    python($pyCommand);
+}

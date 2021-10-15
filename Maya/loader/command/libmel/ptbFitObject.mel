@@ -1,0 +1,81 @@
+/* ptbFitObject.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbFitObject ()
+{
+	int $count;
+	string $objList[] = `ptb_filterTransforms`;
+	int $num = `size ($objList)`;
+	if ($num < 2)
+		error "This functions requires two or more objects to be selected";
+	else
+	{
+		$num -= 1;
+		string $dest;
+
+		int $sourceMode = `radioButtonGrp -q -select ptb5_sourcePiv`;
+		int $destMode = `radioButtonGrp -q -select ptb5_destPiv`;
+		float $rotPiv[3];
+
+		switch ($destMode)
+		{
+			case 1:
+				$rotPiv = `xform -q -ws -t $objList[$num]`;
+				break;
+			case 2:
+				$rotPiv = `xform -q -ws -sp $objList[$num]`;
+				break;
+			case 3:
+				$rotPiv = `xform -q -ws -rp $objList[$num]`;
+				break;
+		}
+
+		for ($count = 0; $count < $num; $count++)
+		{
+			switch ($sourceMode)
+			{
+				case 1:
+					move -a $rotPiv[0] $rotPiv[1] $rotPiv[2] $objList[$count];
+					break;
+				case 2:
+					move -a -spr $rotPiv[0] $rotPiv[1] $rotPiv[2] $objList[$count];
+					break;
+				case 3:
+					move -a -rpr $rotPiv[0] $rotPiv[1] $rotPiv[2] $objList[$count];
+					break;
+			}
+
+			// align rotation
+			{
+				float $oldRot[3] = `xform -q -a -ro $objList[$count]`;
+				float $rot[3] = `xform -q -a -ro $objList[$num]`;
+
+				if (`checkBox -q -value ptb5_rotXBox`)
+					$oldRot[0] = $rot[0];
+				if (`checkBox -q -value ptb5_rotYBox`)
+					$oldRot[1] = $rot[1];
+				if (`checkBox -q -value ptb5_rotZBox`)
+					$oldRot[2] = $rot[2];
+
+				rotate -a $oldRot[0] $oldRot[1] $oldRot[2] $objList[$count];
+			}
+		}
+	}
+}
+
+// end of script

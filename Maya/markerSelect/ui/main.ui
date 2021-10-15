@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>385</width>
+    <height>100</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Right Marker</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="rightMarkerBox">
+        <property name="toolTip">
+         <string>Specify text used to identify right Markers</string>
+        </property>
+        <property name="text">
+         <string>_R</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Center Marker</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="centerMarkerBox">
+        <property name="toolTip">
+         <string>Specify text used to identify center Markers</string>
+        </property>
+        <property name="text">
+         <string>_M</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Left Marker</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="leftMarkerBox">
+        <property name="toolTip">
+         <string>Specify text used to identify left Markers</string>
+        </property>
+        <property name="text">
+         <string>_L</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QPushButton" name="setButton">
+      <property name="minimumSize">
+       <size>
+        <width>75</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Set selected Markers</string>
+      </property>
+      <property name="text">
+       <string>Set Markers</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Selection</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rightButton">
+        <property name="toolTip">
+         <string>Select right Markers</string>
+        </property>
+        <property name="text">
+         <string>Right</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="centerButton">
+        <property name="toolTip">
+         <string>Select center Markers</string>
+        </property>
+        <property name="text">
+         <string>Center</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="leftButton">
+        <property name="toolTip">
+         <string>Select left Markers</string>
+        </property>
+        <property name="text">
+         <string>Left</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

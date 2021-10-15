@@ -1,0 +1,138 @@
+/* ptbCreateGeometry.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbCreateGeometry ()
+{
+	int $count;
+	string $objList[] = `ptb_filterTransforms`;
+	string $newObj[];
+	string $locator;
+	int $geoMode = `radioButtonGrp -q -select ptb14_geoMode`;
+	int $objListSize = `size($objList)`;
+
+	if ($geoMode == 2 && $objListSize < 2)
+		error "This function requires two or more objects to be selected\n";
+	else
+	{
+		// create locator
+		if ($geoMode == 1)
+		{
+			$locator = `createNode locator`;	// create locator
+			string $parent[] = `listRelatives -p $locator`;
+			$objList[$objListSize] = $parent[0];	// set locator as last object to list
+		}
+
+		if ($geoMode == 2)
+			$objListSize -= 1;	// use last object for duplication
+
+		int $sourceMode = `radioButtonGrp -q -select ptb14_sourcePiv`;
+		int $destMode = `radioButtonGrp -q -select ptb14_destPiv`;
+		float $rotPiv[3];
+
+		for ($count = 0; $count < $objListSize; $count++)
+		{
+			switch ($sourceMode)
+			{
+				case 1:
+					$rotPiv = `xform -q -ws -t $objList[$count]`;
+					break;
+				case 2:
+					$rotPiv = `xform -q -ws -sp $objList[$count]`;
+					break;
+				case 3:
+					$rotPiv = `xform -q -ws -rp $objList[$count]`;
+					break;
+			}
+			string $dup[] = `duplicate $objList[$objListSize]`;
+			$newObj[$count] = $dup[0];
+
+			switch ($destMode)
+			{
+				case 1:
+					move -a $rotPiv[0] $rotPiv[1] $rotPiv[2] $newObj[$count];
+					break;
+				case 2:
+					move -a -spr $rotPiv[0] $rotPiv[1] $rotPiv[2] $newObj[$count];
+					break;
+				case 3:
+					move -a -rpr $rotPiv[0] $rotPiv[1] $rotPiv[2] $newObj[$count];
+					break;
+			}
+
+			// align rotation
+			{
+				float $oldRot[3] =`xform -q -a -ro $newObj[$count]`;
+				float $rot[3] = `xform -q -a -ro $objList[$count]`;
+
+				if (`checkBox -q -value ptb14_rotXBox`)
+					$oldRot[0] = $rot[0];
+				if (`checkBox -q -value ptb14_rotYBox`)
+					$oldRot[1] = $rot[1];
+				if (`checkBox -q -value ptb14_rotZBox`)
+					$oldRot[2] = $rot[2];
+
+				rotate -a $oldRot[0] $oldRot[1] $oldRot[2] $newObj[$count];
+			}
+
+			if (`checkBox -q -value ptb14_replaceBox` == 0)
+			{
+				// parent
+				if (`radioButtonGrp -q -select ptb14_groupMode` == 2 &&
+				    `checkBox -q -value ptb14_replaceBox` == 0)
+					parent $newObj[$count] $objList[$count];
+
+				// group
+				if (`radioButtonGrp -q -select ptb14_groupMode` == 3)
+				{
+					string $parent[] = `listRelatives -p $objList[$count]`;
+					if ($parent[0] == "")
+						// create group under world root
+						group $newObj[$count] $objList[$count];
+					else
+						// create group under previous parent
+						group -p $parent[0] $newObj[$count] $objList[$count];
+				}
+			}
+			// replace geometry
+			else
+			{
+				// get original parent
+				string $parent[] = `listRelatives -p $objList[$count]`;
+
+				// print name and delete original
+				print ($objList[$count] + "\n");
+				delete $objList[$count];
+
+				// parent new geometry
+				if ($parent[0] != "")
+					parent $newObj[$count] $parent[0];
+			}
+		}
+
+		// delete locator
+		if ($geoMode == 1)
+			delete $objList[$objListSize];
+
+		// select new geometry
+		select -clear;
+		for ($count = 0; $count < $objListSize; $count++)
+			select -add $newObj[$count];
+	}
+}
+
+// end of script

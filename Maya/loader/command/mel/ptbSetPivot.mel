@@ -1,0 +1,60 @@
+/* ptbSetPivot.mel
+
+Copyright 1998-2002, Dirk Bialluch
+All rights reserved.
+
+Author		: Dirk Bialluch
+
+E-mail  	: DirkB@Mayaring.com
+Homepage	: http://dirk-bialluch.mayaring.com
+
+Creation Date	: 22.05.1998
+Last Update	: 13.01.2002
+*/
+
+//
+// Main procedure
+//
+
+global proc ptbSetPivot ()
+{
+	string $objList[] = `ptb_filterTransforms`;
+
+	if( `checkBox -q -value ptb1_hierarchy` )
+	{
+		global string $ptb_hierarchy[];
+		$ptb_hierarchy = {};
+
+		ptb_listHierarchy $objList;
+		$objList = stringArrayCatenate( $objList, $ptb_hierarchy );
+	}
+
+	for ( $cnt = 0; $cnt < size ($objList); $cnt++ )
+	{
+		float $xyz[3] = `xform -q -ws -pivots $objList[$cnt]`;
+		if (`checkBox -q -value ptb1_xbox`)
+			$xyz[0] = `floatField -q -value ptb1_xvalue`;
+		if (`checkBox -q -value ptb1_ybox`)
+			$xyz[1] = `floatField -q -value ptb1_yvalue`;	
+		if (`checkBox -q -value ptb1_zbox`)
+			$xyz[2] = `floatField -q -value ptb1_zvalue`;
+
+		if (`radioButtonGrp -q -select ptb1_relMode` == 1)
+		{
+			if (`checkBox -q -value ptb1_spBox`)
+				xform -ws -a -sp $xyz[0] $xyz[1] $xyz[2] $objList[$cnt];
+			if (`checkBox -q -value ptb1_rpBox`)
+				xform -ws -a -rp $xyz[0] $xyz[1] $xyz[2] $objList[$cnt];
+		}
+		else
+		{
+			if (`checkBox -q -value ptb1_spBox`)
+				xform -ws -r -sp $xyz[0] $xyz[1] $xyz[2] $objList[$cnt];
+			if (`checkBox -q -value ptb1_rpBox`)
+				xform -ws -r -rp $xyz[0] $xyz[1] $xyz[2] $objList[$cnt];
+		}
+	}
+}
+
+// end of script
+

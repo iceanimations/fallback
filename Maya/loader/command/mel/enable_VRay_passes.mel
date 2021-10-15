@@ -1,0 +1,14 @@
+global proc enable_VRay_passes()
+{
+    python("import site\nsite.addsitedir(r'\\\\ice-sql\\Storage\\repository\\Python_Scripts')");
+    string $pyCommand = "" + 
+    "\ntry:" + 
+    "\n    reload(plugins.enable_VRay_passes)" + 
+    "\nexcept NameError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.enable_VRay_passes" +
+    "\nexcept AttributeError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.enable_VRay_passes" ;
+    python($pyCommand);
+}

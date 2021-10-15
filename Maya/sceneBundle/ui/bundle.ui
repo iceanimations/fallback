@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1152</width>
+    <height>375</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>770</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>420</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Scene Bundle</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Name    </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="nameBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Name for the bundle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addExceptionsButton">
+        <property name="toolTip">
+         <string>Add exceptions for textures (these textures will be used from their original location during render)</string>
+        </property>
+        <property name="text">
+         <string>Add Exceptions</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Location</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="pathBox">
+        <property name="toolTip">
+         <string>Location for the bundle to create in</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="browseButton">
+        <property name="toolTip">
+         <string>Select directory to create bundle in</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QCheckBox" name="currentSceneButton">
+        <property name="toolTip">
+         <string>Create bundle from current scene</string>
+        </property>
+        <property name="text">
+         <string>Current scene</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="deadlineCheck">
+        <property name="toolTip">
+         <string>Bundle scene and submit to deadline for rendering</string>
+        </property>
+        <property name="text">
+         <string>Submit To Deadline</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="deferCheck">
+        <property name="text">
+         <string>Defer To Deadline</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="makeZipButton">
+        <property name="toolTip">
+         <string>Also create zip file from bundle folder</string>
+        </property>
+        <property name="text">
+         <string>Make Zip</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="keepBundleButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Keep the bundle folder after creating zip file or submitting to deadline</string>
+        </property>
+        <property name="text">
+         <string>Keep Bundle</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="keepReferencesButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>If checked, copies the references in the bundle otherwise imports them</string>
+        </property>
+        <property name="text">
+         <string>Keep References</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="keepProxiesButton">
+        <property name="toolTip">
+         <string>Don't collect the proxies if checked</string>
+        </property>
+        <property name="text">
+         <string>Keep Proxies</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="zdepthButton">
+        <property name="toolTip">
+         <string>Turns zdepth on and all other layers off</string>
+        </property>
+        <property name="text">
+         <string>Render zdepth only</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="projectBox">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>--Project--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="epBox">
+        <item>
+         <property name="text">
+          <string>--Episode--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="epBox2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="seqBox">
+        <item>
+         <property name="text">
+          <string>--Sequence--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="seqBox2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="shBox">
+        <item>
+         <property name="text">
+          <string>--Shot--</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="shBox2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="filesLabel">
+           <property name="text">
+            <string>Files</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="bgButton">
+           <property name="text">
+            <string>Use Background Process</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="selectButton">
+           <property name="toolTip">
+            <string>Select all files</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="removeButton">
+           <property name="toolTip">
+            <string>Remove selected files</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="addButton">
+           <property name="toolTip">
+            <string>Add files</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QListWidget" name="filesBox">
+         <property name="toolTip">
+          <string>Add files to create bundles</string>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DropOnly</enum>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="statusLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="stopButton">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="bundleButton">
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Create bundle</string>
+        </property>
+        <property name="text">
+         <string>Create</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>currentSceneButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>widget</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>47</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>75</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>currentSceneButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>nameBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>70</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>deadlineCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>projectBox</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>768</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

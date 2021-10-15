@@ -1,0 +1,14 @@
+global proc Ice_matte_works() {
+    python("import site\nsite.addsitedir(r'\\\\ice-sql\\Storage\\repository\\Python_Scripts')");
+    string $pyCommand = "" + 
+    "\ntry:" + 
+    "\n    reload(plugins.matte_works)" + 
+    "\nexcept NameError as ne:" + 
+    "\n    print ne, ' During reload '" + 
+    "\n    import plugins.matte_works" +
+    "\nexcept AttributeError as ae:" + 
+    "\n    print ae, ' During reload '" + 
+    "\n    import plugins.matte_works" ;
+    python($pyCommand);
+}
+

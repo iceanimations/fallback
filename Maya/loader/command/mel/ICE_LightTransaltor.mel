@@ -1,0 +1,123 @@
+global proc ICE_LightTransaltor()
+{
+    string $Selection[] = `ls -sl`;
+    if(size($Selection)==0)
+    {
+        error("No point light selected!\n");
+        return;
+    }
+    
+    for($objName in $Selection)
+    {
+        print ($objName+"\n");
+    	string $objShape[] = `listRelatives -shapes`;				// Throughing exception if the poly object is not selected.
+    	string $objType = `objectType $objShape[0]`;
+    	if($objType != "pointLight")
+    	{
+        	warning "Object is not point light!\n";
+        	continue;
+        }
+    /*    $connections = `listConnections ($objName+".color")`;
+        float $oldBlackBody_intensity = 1.0;
+        float $oldBlackBody_temp = 2500;*/
+        
+      //  if(size($connections)!=0)
+        {
+            //$oldBlackBody_intensity = `getAttr ($connections[0]+".intensity")`;
+           // $oldBlackBody_temp = `getAttr ($connections[0]+".temperature")`;
+        }
+
+       // string $blackBody = `mrCreateCustomNode -asUtility "" mib_blackbody`;
+        //setAttr ($blackBody+".temperature") $oldBlackBody_temp;
+        //string $command="connectAttr -f "+$blackBody+".outValue "+$objName+".color;";
+
+      //  catch(eval($command));
+        
+        //Add all required Attributes for the selected light.
+        if(!`attributeExists "min_intensity" $objName`)
+        {
+          /*  addAttr -ln "min_intensity" -keyable true -at double $objName;
+            setAttr ($objName+".min_intensity") $oldBlackBody_intensity;*/
+        }   
+
+        if(!`attributeExists "max_intensity" $objName`)    
+        {
+/*            addAttr -ln "max_intensity" -keyable true -at double $objName;
+            setAttr ($objName+".max_intensity") ($oldBlackBody_intensity*1.1);*/
+        }
+        
+        if(!`attributeExists "min_color" $objName`)
+            //addAttr -ln "min_color" -keyable true -at double -dv 1 $objName;
+
+        if(!`attributeExists "max_color" $objName`)    
+            //addAttr -ln "max_color" -keyable true -at double -dv 1.1 $objName;
+                
+        
+        if(!`attributeExists "max_height" $objName`)
+            addAttr -ln "max_height" -keyable true -at double  -min 0.0001 -max 100 -dv 1 $objName;
+    
+        if(!`attributeExists "speed" $objName`)
+            addAttr -ln "speed" -keyable true -at double  -min 0.0001 -max 100 -dv 1 $objName;
+    
+        if(!`attributeExists "variation" $objName`)
+            addAttr -ln "variation" -keyable true -at double  -min 0.0001 -max 100 -dv 1 $objName;
+    
+        if(!`attributeExists "startTime" $objName`)
+            addAttr -ln "startTime" -keyable true -at double  -min 0.0001 -dv 1 $objName;
+            
+        
+        $initialX = `getAttr ($objName+".tx")`;
+        $initialY = `getAttr ($objName+".ty")`;
+        $initialZ = `getAttr ($objName+".tz")`;
+    
+        $expr_str =  "int $frame = `currentTime -q`;\n";
+		$expr_str += "if($frame > "+$objName+".startTime)\n";
+		
+		$expr_str += "{\n";
+        $expr_str += "\tint $variation = "+$objName+".variation;\n";
+        
+        $expr_str += "\tfloat $chance = noise($frame*(1.0/$variation));\n";
+        $expr_str += "\tfloat $old_chance = noise(($frame-1)*(1.0/$variation));\n";
+        $expr_str += "\tfloat $speed = "+$objName+".speed;\n";
+        $expr_str += "\tif(($old_chance*$chance) < 0)\n";    
+        $expr_str += "\t{\n";
+        $expr_str += "\t\t$speed = rand(-$speed, $speed);\n";
+        	
+        $expr_str += "\t}\n";
+        $expr_str += "\tfloat $flicker = 0.5 + 0.5 * noise($frame * $speed);\n";
+//        $expr_str += "\tfloat $minintensity = "+$objName+".min_intensity;\n";
+//        $expr_str += "\tfloat $maxintensity = "+$objName+".max_intensity;\n";
+//        $expr_str += "\t"+$blackBody+".intensity = $minintensity + ($maxintensity - $minintensity)*$flicker;\n";
+        
+//        $expr_str += "\tfloat $mincolor = "+$objName+".min_color;\n";
+//        $expr_str += "\tfloat $maxcolor = "+$objName+".max_color;\n\n";
+        
+        /*file87.colorGainR = $mincolor + ($maxcolor - $mincolor)*$flicker;
+    	file87.colorGainG = $mincolor + ($maxcolor - $mincolor)*$flicker;
+	    file87.colorGainB = $mincolor + ($maxcolor - $mincolor)*$flicker;*/
+	    
+        $expr_str += "\tif($frame == "+$objName+".startTime)\n";
+        $expr_str += "\t{\n";
+        $expr_str += "\t\t"+$objName+".translateX = "+$initialX+";\n";
+        $expr_str += "\t\t"+$objName+".translateY = "+$initialY+";\n";
+        $expr_str += "\t\t"+$objName+".translateZ = "+$initialZ+";\n";
+        $expr_str += "\t}\n";
+        $expr_str += "\telse\n";
+        $expr_str += "\t{\n";
+        $expr_str += "\t\t"+$objName+".translateX = "+$initialX+"+"+$objName+".max_height*0.2*$flicker;\n";
+        $expr_str += "\t\t"+$objName+".translateY = "+$initialY+"+"+$objName+".max_height*$flicker;\n";
+        $expr_str += "\t\t"+$objName+".translateZ = "+$initialZ+"+"+$objName+".max_height*0.2*$flicker;\n";
+        $expr_str += "\t}\n";
+    	$expr_str += "}\n";
+        $expr_str += "else\n";
+        $expr_str += "{\n";
+        $expr_str += "\t"+$objName+".translateX = "+$initialX+";\n";
+        $expr_str += "\t"+$objName+".translateY = "+$initialY+";\n";
+        $expr_str += "\t"+$objName+".translateZ = "+$initialZ+";\n";
+        $expr_str += "}\n";  	
+		
+    	expression -o $objName -s $expr_str -n ($objName+"flicker_expr");
+    	
+    }
+}
+ICE_LightTransaltor()

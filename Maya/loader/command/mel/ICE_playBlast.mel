@@ -1,0 +1,29 @@
+global proc ICE_playBlast()
+{
+	string $cam[]=`ls -cameras`;
+	string $ccam;
+	string $proPath=`workspace -q -fn`;
+	sysFile -md ($proPath+"/PlayBlast"); 
+	string $panel = `getPanel -wf`;
+	for($ccam in $cam)
+	{
+		
+		if(`attributeExists "in" $ccam`)
+		{
+			
+			string $selectcam="lookThroughModelPanel "+$ccam+" "+$panel;
+			eval($selectcam);
+			//addCameraInfoHUD();
+			string $camin="getAttr "+$ccam+".in";
+			string $camout="getAttr "+$ccam+".out";
+			int $cammin=eval($camin);
+			int $cammout=eval($camout);
+			string $name=$proPath+"/PlayBlast"+"/"+$ccam;
+			playblast -st $cammin -et $cammout  -format movie -filename $name -forceOverwrite  -clearCache 1 -viewer 1 -showOrnaments 1 -fp 4 -percent 50 -compression none;
+			
+
+		}
+
+	}
+
+}

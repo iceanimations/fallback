@@ -1,0 +1,261 @@
+
+proc string rockRelatives () 
+{
+    string $results[] = `listRelatives -p`;
+    string $results2[];
+    if (`nodeType ($results[0])` != "transform") 
+	{
+        $results2 = `listRelatives -p $results[0]`;
+    	}
+	else
+	{
+	$results2[0] = $results[0];
+	}
+    return $results2[0];
+}
+
+////////////////////////////////////
+
+
+global proc genRock()
+{
+waitCursor -state on;
+
+//bolder generation proc:
+int $bolderIndex;
+
+//number of bolders in group:
+int $bolderNumber = `intSliderGrp -q -value rockNum`;
+
+//create group node:
+string $bolderGroup = `createNode transform -n bolderGroup1`;
+
+//generate bolder in for loop:
+
+for($bolderIndex = 0; $bolderIndex < $bolderNumber; $bolderIndex++)
+	{
+
+	//generate base curve and 1st face:
+	int $bolderSect = rand (4,10);
+	float $bolderRadi =  rand (1.5,3);
+		string $bolderBaseCurve[] = `circle -c 0 0 0 -sweep -360 -r $bolderRadi -nr 0 1 0 -d 1 -ut 0 -s $bolderSect -ch 0`;
+		string $bolderBasePoly[] = `planarSrf -ch 1 -d 3 -ko 0 -tol 0.01 -rn 0 -po 1 $bolderBaseCurve[0]`;
+		string $tesser[] = `listHistory $bolderBasePoly[0]`;
+			setAttr ($tesser[1] + ".polygonType") 1;
+			setAttr ($tesser[1] + ".format") 0;
+			setAttr ($tesser[1] + ".polygonCount") 1;
+		DeleteHistory $bolderBasePoly[0];
+		delete $bolderBaseCurve[0];
+	
+	//get the shape node and the 1st face for later use:
+
+	string $bolderPoly[] = `listRelatives -s $bolderBasePoly[0]`;
+	select -r $bolderPoly.f["*"];
+	string $bolderPolyF[] = `filterExpand -sm 34`;
+	
+
+	//extrude:
+	//float $bolderExtrudeY = rand (.5,3);
+	int $bolderExtrudeY = `intSliderGrp -q -value rockHeight`;
+	int $bolderDivisionsY = `intSliderGrp -q -value rockHeight`;
+	float $divHeight = ($bolderDivisionsY /2);
+	polyExtrudeFacet -ch 0 -kft 1 -ty $bolderExtrudeY -ran .25 -divisions $divHeight -off 0 $bolderPolyF[0];
+				
+	//set up UV's .. kinda!!
+	select -r $bolderPolyF[0];
+	PolySelectConvert 4;
+	polyEditUV -pu 0.5 -pv 0.5 -su .6 -sv .6 ;
+
+		//make softbody and perturb:
+		
+		select -r $bolderPoly[0];
+		
+		float $bolderNoise = `floatSliderGrp -q -value rockNoise`;
+		select -r $bolderPoly[0];
+		polyTriangulate -ch 1 $bolderPoly[0];
+		DeleteHistory $bolderPoly[0];
+		string $bolderSoftBody[] =`soft -c $bolderPoly[0]`;
+		//string $bolderEX = "position = position + sphrand(<<.5,.5,.5>>);";
+		string $bolderEX = "position = position + sphrand(<<" + $bolderNoise + "," + $bolderNoise + ", " + $bolderNoise +">>);";
+
+			dynExpression -s $bolderEX -c $bolderSoftBody[0];
+			dynExpression -s $bolderEX -r $bolderSoftBody[0];
+			delete -ch $bolderPoly[0];
+			delete $bolderSoftBody[0];
+
+
+	//look at the lowRez/highRez flag, if on lowRez skip 2nd perturb:
+
+		int $rockRez = `radioButtonGrp -q -sl rezFlag`;
+
+		if($rockRez == 2)
+		{
+			//smooth poly:
+			polySmooth  -dv 2 -c 0.8 -ch 1 $bolderPoly[0];
+			delete -ch $bolderPoly[0];
+
+			//repeat soft perturb:
+			select -r $bolderPoly[0];
+			string $bolderSoftBody[] =`soft -c $bolderPoly[0]`;
+			//string $bolderEX = "position = position + sphrand(<<.06,.08,.05>>);";
+			string $bolderEX = "position = position + sphrand(<<.1,.1,.1>>);";
+
+				dynExpression -s $bolderEX -c $bolderSoftBody[0];
+				dynExpression -s $bolderEX -r $bolderSoftBody[0];
+				delete -ch $bolderPoly[0];
+				delete $bolderSoftBody[0];
+
+			//smooth again:
+			polySmooth  -dv 1 -c 0.5 -ch 1 $bolderPoly[0];
+			//polySmooth  -dv 1 -c 1 -ch 1 $bolderPoly[0];
+			//delete -ch $bolderPoly[0];
+		}
+		else
+		{
+			//smooth poly:
+			polySmooth  -dv 1 -c 1 -ch 1 $bolderPoly[0];
+			delete -ch $bolderPoly[0];
+		}
+	
+	//call the prco to get the rock parent node 
+	//This is done in a proc to make the script 2.5 and 3.0 compatable:
+	
+
+	string $moveBolder = `rockRelatives`;
+
+	//random scale:
+		float $newBolderSmin = `floatSliderGrp -q -value rockScaleMin`;
+		float $newBolderSmax = `floatSliderGrp -q -value rockScaleMax`;
+		float $newBolderSheer = `floatSliderGrp -q -value rockSheer`;
+		float $newBolderSRand = rand($newBolderSmin,$newBolderSmax);
+			
+			scale $newBolderSRand $newBolderSRand $newBolderSRand;
+			string $bolderShearXY =  $moveBolder + ".shearXY";
+			setAttr $bolderShearXY $newBolderSheer;
+	
+	// randomly distribute:
+		float $bolderDradius = `floatSliderGrp -q -value distRadius`;
+		float $bolderDradiusN = -$bolderDradius;
+		float $distX = rand ($bolderDradiusN,$bolderDradius);
+		float $distZ = rand ($bolderDradiusN,$bolderDradius);
+			
+		string $distBolder[] = {(($moveBolder) + ".translateX"), ($moveBolder + ".ty"), ($moveBolder + ".tz")};
+
+		float $rockPosition = `floatSliderGrp -q -value rockPos`;
+			setAttr $distBolder[0] $distX; 
+			setAttr $distBolder[1] $rockPosition;
+			setAttr $distBolder[2] $distZ;
+			
+		float $randRotY = rand (0,360);
+			string $rotBolder = $moveBolder + ".ry";
+			setAttr $rotBolder $randRotY;
+
+
+	//parent to group node and rename:
+	parent $moveBolder $bolderGroup;
+	rename $moveBolder "bolder1";
+ 	}
+
+//global scale and group:
+
+	float $bolderGRPscale = `floatSliderGrp -q -value globalRockScale`;
+	select $bolderGroup;
+	scale $bolderGRPscale $bolderGRPscale $bolderGRPscale;
+	makeIdentity -apply true;
+
+waitCursor -state off;
+
+}
+//end of bolder proc:
+
+global proc RockGenerator()
+{
+string $win = "genRock";
+if (`window -exists $win`) deleteUI -window $win;       
+	window -title "Rock Generator"
+	-minimizeButton true -maximizeButton false -rtf true
+	-wh 300 300 $win;
+
+		columnLayout -adjustableColumn true -cal "left" ColumnLayout;
+		frameLayout -labelVisible false -marginWidth 0 -marginHeight 0 rockFrame;	
+		columnLayout;
+
+			intSliderGrp
+				-label "Number of Rocks" -field true
+				-value 5 -minValue 1 -maxValue 30 -sliderStep 1
+				rockNum;
+			floatSliderGrp
+				-label "Distribution Radius" -field true -precision 2
+                                -value 10 -minValue 0 -maxValue 100 -step .1
+				distRadius;
+
+			separator -height 20 -st none;
+			
+			intSliderGrp
+				-label "Height Ratio" -field true 
+                               -value 2 -minValue 0 -maxValue 10 -step 1
+				rockHeight;
+			floatSliderGrp
+				-label "Sheer" -field true -precision 2
+                               -value 0 -minValue 0 -maxValue 5 -step .01
+				rockSheer;
+			floatSliderGrp
+				-label "3D Noise" -field true -precision 2
+                               -value .5 -minValue 0 -maxValue 3 -step .01
+				rockNoise;
+				
+			separator -height 20 -st none;	
+				
+			floatSliderGrp
+				-label "Global Rock Scale" -field true -precision 2
+                                -value 1 -minValue .1 -maxValue 10 -step .1
+				globalRockScale;
+			floatSliderGrp
+				-label "Rock Scale Min" -field true -precision 2
+                                -value .5 -minValue .01 -maxValue 2 -step .01
+				rockScaleMin;
+			floatSliderGrp
+				-label "Rock Scale Max" -field true -precision 2
+                                -value 1 -minValue .01 -maxValue 2 -step .01
+				rockScaleMax;
+			separator -height 10 -st none;
+
+			floatSliderGrp -label "Rock Position (Y)" -field true -precision 2
+			rockPos;
+
+			separator -height 10 -st none;
+
+			radioButtonGrp
+            		-numberOfRadioButtons 2
+            		-label "Rock Resolution"
+            		-labelArray2 "lowRez" "highRez"
+			-sl 1 rezFlag;
+
+			separator -height 10 -st none;
+			
+		setParent ColumnLayout;
+			textField -text "RockGenerator 2.0 - Requires Maya2.5 or Higher:" -editable false StatusLine; 
+ 			
+		rowColumnLayout -numberOfRows 1 -rowHeight 1 30;
+			
+			button -label "Generate" -w 129 -c "genRock()";
+ 			button -label "Discard" -w 130 -c delete;
+			button -label "Close" -w 129 -c ("window -e -vis 0 "+$win) closeBtn;
+			// setParent RockGenerator;
+
+	//alert callbacks:
+
+	intSliderGrp -edit -changeCommand "textField -edit -text \"ALERT: A Number > 5 May Take A Few Seconds:\"StatusLine" rockNum;
+	floatSliderGrp -edit -changeCommand "textField -edit -text \"Radius From Global Origin:\"StatusLine" distRadius;
+	intSliderGrp -edit -changeCommand "textField -edit -text \"Sets a Random Height Value:\"StatusLine" rockHeight;
+	floatSliderGrp -edit -changeCommand "textField -edit -text \"Sets The Sheer For An Angled Rock:\"StatusLine" rockSheer;
+	floatSliderGrp -edit -changeCommand "textField -edit -text \"Sets Amount Of Perturbation in The Rocks:\"StatusLine" rockNoise;
+	floatSliderGrp -edit -changeCommand "textField -edit -text \"Sets Over All Size Of Rock Group:\"StatusLine" globalRockScale;
+	floatSliderGrp -edit -changeCommand "textField -edit -text \"Sets Minimum Size Of Rock In Group:\"StatusLine" rockScaleMin;
+	floatSliderGrp -edit -changeCommand "textField -edit -text \"Sets Maximum Size Of Rock In Group:\"StatusLine" rockScaleMax;
+
+
+showWindow $win;
+}
+
+RockGenerator();

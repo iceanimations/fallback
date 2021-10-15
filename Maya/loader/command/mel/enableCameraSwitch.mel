@@ -1,0 +1,28 @@
+global proc enableCameraSwitch()
+{
+	$selection = `ls -sl`;
+	$cameras = `listCameras -p`;
+
+	if(size($selection)==0)
+	{
+		warning("You need to select at least one camera!\n");
+		return;
+	}
+	
+	string $expr_str;
+
+	for ($sel in $selection)
+	{
+		if(stringArrayContains($sel, $cameras)==0)
+			continue;
+		
+		if($sel!=$selection[0])
+			$expr_str += "else ";
+		$expr_str += "if(frame>="+$sel+".in && frame<="+$sel+".out)\n{\n\tlookThru "+$sel+";\n}\n\n";
+	}
+
+	if(`objExists cameraSwitchExpr`)
+		delete cameraSwitchExpr;
+
+	expression -s $expr_str -n cameraSwitchExpr;
+}
