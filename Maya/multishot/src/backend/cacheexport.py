@@ -61,7 +61,7 @@ class CacheExport(Action):
         conf['simulation_rate'] = 1
         conf['sample_multiplier'] = 1
         conf['inherit_modf_from_cache'] = 1
-        conf['store_doubles_as_float'] = 1
+        conf['store_doubles_as_float'] = 0
         conf['cache_format'] = 'mcc'
         conf['do_texture_export'] = 1
         conf['texture_export_data'] = [
@@ -324,7 +324,7 @@ class CacheExport(Action):
                         name = _name
 
                     names.add(name)
-                    pc.select(geoset.members())
+                    pc.select(geoset.dsm.inputs())
                     pc.Mel.eval(command % name)
 
             tempFilePath = tempFilePath.replace('/', '\\\\')
